@@ -1,26 +1,15 @@
 -- ============================================================================
---  HD STUDIOS - DATABASE SCHEMA  (structure only, no data)
---
---  Goes in the project at:  src/lib/server/schema.sql
---
---  * Does NOT create a database (on the school server you cannot). It creates
---    the tables INSIDE the database that is selected in DataGrip.
---  * Every table uses CREATE TABLE IF NOT EXISTS, so running this file again
---    never deletes anything. To wipe everything use db/reset.sql, and to fill
---    the demo data use db/seed.sql.
---  * Every table is InnoDB + utf8mb4, so Albanian letters (e, c with marks)
---    and emojis are stored correctly, even if the server default is latin1.
---  * Driver for the code: mysql2, with ? placeholders (not Postgres $1 syntax).
---
---  Order to run:   reset.sql (optional)  ->  schema.sql  ->  seed.sql
--- ============================================================================
-
+--  HD STUDIOS - DATABASE SCHEMA
 
 -- ----------------------------------------------------------------------------
 --  1. users  -  every person on the platform
 --     username is used in the public profile URL:  /user/[username]
 --     (allowed characters are checked in the register code: a-z 0-9 _ -)
 -- ----------------------------------------------------------------------------
+
+create database donvat22_hd_studios;
+use database donvat22_hd_studios;
+
 CREATE TABLE IF NOT EXISTS users (
   id            INT AUTO_INCREMENT PRIMARY KEY,
   username      VARCHAR(40)  NOT NULL,
