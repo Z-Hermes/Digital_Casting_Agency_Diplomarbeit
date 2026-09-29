@@ -4,7 +4,12 @@ export async function handle({ event, resolve }) {
 	const sessionId = event.cookies.get('session');
 
 	if (sessionId) {
-		event.locals.user = await getUserFromSession(sessionId);
+		try {
+			event.locals.user = await getUserFromSession(sessionId);
+		} catch (error) {
+			console.error('Session error:', error);
+			event.locals.user = null;
+		}
 	} else {
 		event.locals.user = null;
 	}

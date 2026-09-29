@@ -1,13 +1,10 @@
 <script>
 	let username = '';
-	let email = '';
-	let name = '';
 	let password = '';
-	let role = 'actor';
 </script>
 
 <svelte:head>
-	<title>Register | HD Studios</title>
+	<title>Login | HD Studios</title>
 </svelte:head>
 
 <div
@@ -26,15 +23,14 @@
 			</p>
 
 			<h1 class="mt-12 text-6xl font-light tracking-tight">
-				Create Account
+				Welcome Back
 			</h1>
 
 			<div class="mt-6 h-1 w-24 rounded-full bg-teal-400"></div>
 
 			<p class="mt-8 max-w-lg text-xl leading-relaxed text-teal-100/70">
-				Join HD Studios and create your professional profile.
-				Connect with actors, directors, producers and other people
-				working in the Albanian film industry.
+				Sign in to your HD Studios account and continue
+				exploring opportunities in the Albanian film industry.
 			</p>
 		</div>
 
@@ -52,26 +48,17 @@
 				{/each}
 			</div>
 
-			<div class="relative mx-12 rounded-sm bg-[#111817] px-10 py-8">
+			<div class="relative mx-12 min-h-[480px] rounded-sm bg-[#111817] px-10 py-8">
 
 				<div class="text-center">
 					<h2 class="text-3xl font-light">
-						Register
+						Login
 					</h2>
 
 					<div class="mx-auto mt-3 h-1 w-24 rounded-full bg-teal-400"></div>
 				</div>
 
-				<form method="POST" class="mt-7 space-y-3">
-
-					<input
-						name="name"
-						type="text"
-						bind:value={name}
-						required
-						placeholder="Full name"
-						class="w-full rounded-lg border border-white/10 bg-[#162322] px-4 py-3 text-white outline-none transition placeholder:text-gray-400 focus:border-teal-400"
-					/>
+				<form method="POST" class="mt-10 space-y-4">
 
 					<input
 						name="username"
@@ -79,15 +66,6 @@
 						bind:value={username}
 						required
 						placeholder="Username"
-						class="w-full rounded-lg border border-white/10 bg-[#162322] px-4 py-3 text-white outline-none transition placeholder:text-gray-400 focus:border-teal-400"
-					/>
-
-					<input
-						name="email"
-						type="email"
-						bind:value={email}
-						required
-						placeholder="Email address"
 						class="w-full rounded-lg border border-white/10 bg-[#162322] px-4 py-3 text-white outline-none transition placeholder:text-gray-400 focus:border-teal-400"
 					/>
 
@@ -100,48 +78,29 @@
 						class="w-full rounded-lg border border-white/10 bg-[#162322] px-4 py-3 text-white outline-none transition placeholder:text-gray-400 focus:border-teal-400"
 					/>
 
-					<div class="relative">
-						<select
-							name="role"
-							bind:value={role}
-							class="w-full appearance-none rounded-lg border border-white/10 bg-[#162322] px-4 py-3 text-gray-300 outline-none transition focus:border-teal-400"
+					<div class="pt-1 text-right">
+						<a
+							href="/reset-password"
+							class="text-sm text-teal-400 transition hover:text-teal-300"
 						>
-							<option value="actor">Actor</option>
-							<option value="producer">Producer</option>
-							<option value="director">Director</option>
-							<option value="spectator">Guest</option>
-						</select>
-
-						<div class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-teal-400">
-							<svg
-								width="16"
-								height="16"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							>
-								<path d="m6 9 6 6 6-6" />
-							</svg>
-						</div>
+							Forgot password?
+						</a>
 					</div>
 
 					<button
 						type="submit"
-						class="w-full rounded-lg bg-teal-400 py-3 font-medium text-white transition hover:bg-teal-300"
+						class="mt-3 w-full rounded-lg bg-teal-400 py-3 font-medium text-white transition hover:bg-teal-300"
 					>
-						Create Account
+						Login
 					</button>
 
-					<p class="pt-2 text-center text-sm text-gray-400">
-						Already have an account?
+					<p class="pt-4 text-center text-sm text-gray-400">
+						Don't have an account?
 						<a
-							href="/login"
+							href="/register"
 							class="ml-2 text-teal-400 transition hover:text-teal-300"
 						>
-							Login
+							Create Account
 						</a>
 					</p>
 
