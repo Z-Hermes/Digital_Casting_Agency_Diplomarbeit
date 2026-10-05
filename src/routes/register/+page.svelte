@@ -1,9 +1,13 @@
+
+
 <script>
-	let username = '';
-	let email = '';
-	let name = '';
-	let password = '';
-	let role = 'actor';
+
+	let {form} = $props();
+	let username = $state('');
+	let email = $state('');
+	let name = $state('');
+	let password = $state('');
+	let role = $state('actor');
 </script>
 
 <svelte:head>
@@ -134,6 +138,12 @@
 					>
 						Create Account
 					</button>
+
+					{#if form?.error}
+    <p role="alert" class="text-sm text-red-400">
+        {form.error}
+    </p>
+{/if}
 
 					<p class="pt-2 text-center text-sm text-gray-400">
 						Already have an account?
