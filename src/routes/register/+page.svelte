@@ -62,7 +62,7 @@
 					<div class="mx-auto mt-3 h-1 w-24 rounded-full bg-teal-400"></div>
 				</div>
 
-				<form method="POST" class="mt-7 space-y-3">
+				<form method="POST" class="mt-7 space-y-3" action="?/register">
 
 					<input
 						name="name"
