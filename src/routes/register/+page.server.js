@@ -3,14 +3,9 @@ import bcrypt from 'bcrypt';
 import { db } from '$lib/server/database.js';
 
 export const actions = {
-<<<<<<< HEAD
-  default: async ({ request }) => {
-	const form = await request.formData();
-=======
+
 	register: async ({ request }) => {
 		const form = await request.formData();
->>>>>>> 2c67f1d758a77543701888c8aadc9cfd6afd1578
-
 		const name = form.get('name');
 		const username = form.get('username');
 		const email = form.get('email');
