@@ -1,6 +1,9 @@
 <script>
-	let username = '';
-	let password = '';
+	let username = $state('');
+	let email = $state('');
+	let name = $state('');
+	let password = $state('');
+	let role = $state('actor');
 </script>
 
 <svelte:head>

@@ -2,7 +2,8 @@ import { fail, redirect } from '@sveltejs/kit';
 import bcrypt from 'bcrypt';
 import { db } from '$lib/server/database.js';
 
-export async function actions({ request }) {
+export const actions = {
+  default: async ({ request }) => {
 	const form = await request.formData();
 
 	const name = form.get('name');
@@ -43,4 +44,6 @@ export async function actions({ request }) {
 	);
 
 	throw redirect(303, '/login');
+	}
+	
 }
