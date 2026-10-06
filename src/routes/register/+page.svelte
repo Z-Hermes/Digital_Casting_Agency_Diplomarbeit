@@ -20,41 +20,41 @@
 		radial-gradient(circle at 85% 80%, rgba(0, 190, 170, 0.18), transparent 35%),
 		linear-gradient(135deg, #062f2d 0%, #075c55 50%, #021d1c 100%);"
 >
-	<div class="mx-auto flex min-h-screen max-w-6xl items-center gap-20 px-8">
+	<div class="mx-auto flex min-h-screen max-w-6xl flex-col items-center justify-center gap-10 px-4 py-10 sm:px-8 lg:flex-row lg:gap-20">
 
-		<div class="w-1/2 -translate-y-10">
+		<div class="w-full lg:w-1/2 lg:-translate-y-10">
 			<p class="text-2xl tracking-wide">
 				<span class="text-teal-400">HD</span> Studios
 			</p>
 
-			<h1 class="mt-12 text-6xl font-light tracking-tight">
+			<h1 class="mt-6 text-4xl font-light tracking-tight sm:text-6xl lg:mt-12">
 				Create Account
 			</h1>
 
 			<div class="mt-6 h-1 w-24 rounded-full bg-teal-400"></div>
 
-			<p class="mt-8 max-w-lg text-xl leading-relaxed text-teal-100/70">
+			<p class="mt-8 max-w-lg text-lg leading-relaxed text-teal-100/70 sm:text-xl">
 				Join HD Studios and create your professional profile.
 				Connect with actors, directors, producers and other people
 				working in the Albanian film industry.
 			</p>
 		</div>
 
-		<div class="relative w-[530px] rounded-[28px] bg-black p-5 shadow-2xl">
+		<div class="relative w-full max-w-[530px] rounded-[28px] bg-black p-5 shadow-2xl">
 
-			<div class="absolute left-4 top-5 flex h-[calc(100%-40px)] flex-col justify-between">
+			<div class="absolute left-2 top-5 flex h-[calc(100%-40px)] flex-col justify-between sm:left-4">
 				{#each Array(8) as _}
-					<div class="h-8 w-12 rounded-lg bg-[#18201f]"></div>
+					<div class="h-8 w-7 rounded-lg bg-[#18201f] sm:w-12"></div>
 				{/each}
 			</div>
 
-			<div class="absolute right-4 top-5 flex h-[calc(100%-40px)] flex-col justify-between">
+			<div class="absolute right-2 top-5 flex h-[calc(100%-40px)] flex-col justify-between sm:right-4">
 				{#each Array(8) as _}
-					<div class="h-8 w-12 rounded-lg bg-[#18201f]"></div>
+					<div class="h-8 w-7 rounded-lg bg-[#18201f] sm:w-12"></div>
 				{/each}
 			</div>
 
-			<div class="relative mx-12 rounded-sm bg-[#111817] px-10 py-8">
+			<div class="relative mx-6 rounded-sm bg-[#111817] px-5 py-8 sm:mx-12 sm:px-10">
 
 				<div class="text-center">
 					<h2 class="text-3xl font-light">
@@ -140,6 +140,12 @@
 					>
 						Create Account
 					</button>
+
+					{#if form?.error}
+    <p role="alert" class="text-sm text-red-400">
+        {form.error}
+    </p>
+{/if}
 
 					<p class="pt-2 text-center text-sm text-gray-400">
 						Already have an account?
