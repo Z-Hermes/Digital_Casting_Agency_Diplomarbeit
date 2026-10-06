@@ -5,6 +5,11 @@
 
 	import logo from '$lib/assets/logo.png';
 	import defaultPfp from '$lib/assets/default-pfp.png';
+	import { page } from '$app/state';
+
+	// pages that should NOT show the navbar
+	const noNavPages = ['/login', '/register'];
+	let showNav = $derived(!noNavPages.includes(page.url.pathname));
 
 	let { children } = $props();
 
@@ -12,8 +17,10 @@
 	let menuOpen = $state(false);
 </script>
 
-<div class="min-h-screen bg-[#101413] pt-3 font-['Segoe_UI',system-ui,sans-serif] text-[#f2f2f0]">
-	<!-- ===== NAVBAR (shown on every page) ===== -->
+<div class="min-h-screen bg-[#101413] font-['Segoe_UI',system-ui,sans-serif] text-[#f2f2f0]">
+	<!-- ===== NAVBAR (hidden on login/register) ===== -->
+	{#if showNav}
+	<div class="pt-3">
 	<header
 		class="relative mx-3 flex items-center justify-between rounded-[15px] bg-[#1a1a18] pr-3 sm:pr-6 xl:mx-auto xl:max-w-[1270px]"
 	>
@@ -56,6 +63,8 @@
 			</button>
 		</div>
 	</header>
+	</div>
+	{/if}
 
 	{@render children()}
 </div>
