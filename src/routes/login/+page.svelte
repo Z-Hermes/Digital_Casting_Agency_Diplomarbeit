@@ -1,9 +1,8 @@
 <script>
-	let username = $state('');
-	let email = $state('');
-	let name = $state('');
-	let password = $state('');
-	let role = $state('actor');
+    let { form } = $props();
+
+    let username = $state('');
+    let password = $state('');
 </script>
 
 <svelte:head>
@@ -61,7 +60,11 @@
 					<div class="mx-auto mt-3 h-1 w-24 rounded-full bg-teal-400"></div>
 				</div>
 
-				<form method="POST" class="mt-10 space-y-4">
+				{#if form?.error}
+					<p class="mt-4 text-center text-sm text-red-400">{form.error}</p>
+				{/if}
+
+				<form method="POST" class="mt-10 space-y-4" action="?/login">
 
 					<input
 						name="username"
