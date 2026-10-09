@@ -11,7 +11,7 @@
 	const noNavPages = ['/login', '/register'];
 	let showNav = $derived(!noNavPages.includes(page.url.pathname));
 
-	let { children } = $props();
+	let { data, children } = $props();
 
 	// true = phone dropdown menu is open
 	let menuOpen = $state(false);
@@ -37,15 +37,27 @@
 				onclick={() => (menuOpen = false)}
 			>
 				<a href="/" class="hover:text-[#35c9b8]">Home</a>
-				<a href="/inbox" class="hover:text-[#35c9b8]">Inbox</a>
+				<a href="/messages" class="hover:text-[#35c9b8]">Inbox</a>
 				<a href="/actors" class="hover:text-[#35c9b8]">Actors</a>
 				<a href="/news" class="hover:text-[#35c9b8]">News</a>
-				<a href="/login" class="rounded-full bg-[#084a43] px-5 py-1.5 text-[#8fcfc4] hover:text-[#35c9b8] md:px-4 md:py-1 lg:px-5 lg:py-1.5">
-					log in
-				</a>
+
+				{#if data.user}
+					<form method="POST" action="/logout">
+						<button
+							type="submit"
+							class="rounded-full bg-[#084a43] px-5 py-1.5 text-[#8fcfc4] hover:text-[#35c9b8] md:px-4 md:py-1 lg:px-5 lg:py-1.5"
+						>
+							log out
+						</button>
+					</form>
+				{:else}
+					<a href="/login" class="rounded-full bg-[#084a43] px-5 py-1.5 text-[#8fcfc4] hover:text-[#35c9b8] md:px-4 md:py-1 lg:px-5 lg:py-1.5">
+						log in
+					</a>
+				{/if}
 			</nav>
 
-			<a href="/profile">
+			<a href={data.user ? '/dashboard' : '/login'}>
 				<img
 					src={defaultPfp}
 					alt="Your profile"
