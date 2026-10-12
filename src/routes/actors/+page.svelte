@@ -1,5 +1,6 @@
 <script>
 	import defaultPfp from '$lib/assets/default-pfp.png';
+	import Img from '$lib/components/Img.svelte';
 
 	let { data } = $props();
 
@@ -76,11 +77,8 @@
 					href="/user/{actor.username}"
 					class="overflow-hidden rounded-[20px] border border-[#2a302d] bg-[#1b201d] transition hover:border-teal-400"
 				>
-					<img
-						src={actor.avatar_url || defaultPfp}
-						alt={actor.name}
-						class="h-[220px] w-full object-cover"
-					/>
+					<Img src={actor.avatar_url} alt={actor.name} class="h-[220px] w-full object-cover" />
+					
 					<div class="p-4">
 						<h3 class="text-[20px]">{actor.name}</h3>
 						<p class="mt-1 text-[14px] text-[#8a8f8c]">{actor.city ?? 'Unknown city'}</p>

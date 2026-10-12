@@ -1,5 +1,6 @@
 <script>
 	import defaultPfp from '$lib/assets/default-pfp.png';
+	import Img from '$lib/components/Img.svelte';
 
 	let { data } = $props();
 
@@ -24,8 +25,8 @@
 	<div class="flex flex-col gap-8 md:flex-row">
 		<!-- Photo + status -->
 		<div class="shrink-0">
-			<img
-				src={data.profile.avatar_url || defaultPfp}
+			<Img
+				src={data.profile.avatar_url}
 				alt={data.profile.name}
 				class="h-[280px] w-[220px] rounded-[20px] object-cover"
 			/>
