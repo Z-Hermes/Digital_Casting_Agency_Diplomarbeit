@@ -11,10 +11,9 @@
 	];
 </script>
 
-<!-- (navbar is now in +layout.svelte) -->
-
 <!--
 	Sizes:  no prefix = phone | md: = tablet (768px+) | lg: = laptop (1024px+) | xl: = big screen (1280px+)
+	Navbar and footer come from +layout.svelte
 -->
 
 <!-- ===== HERO ===== -->
@@ -33,7 +32,7 @@
 		<!-- divider: horizontal on phone, vertical from tablet up -->
 		<div class="h-[2px] w-[150px] bg-[#888] md:h-[150px] md:w-[2px] lg:h-[230px]"></div>
 
-		<p class="max-w-[540px] text-[18px] md:max-w-[340px] lg:max-w-[540px] lg:text-[29px]">
+            		<p class="max-w-[540px] text-[18px] md:max-w-[340px] lg:max-w-[540px] lg:text-[29px]">
 			The platform where actors showcase their talent and casting professionals discover the
 			perfect cast for their next production.
 		</p>
@@ -77,11 +76,3 @@
 		</div>
 	</div>
 </section>
-
-<!-- ===== FOOTER ===== -->
-<footer class="bg-[#0b0d0c] py-9">
-	<div class="mx-auto flex max-w-[1124px] items-center justify-between px-5 md:px-10 lg:px-16 xl:px-5">
-		<p class="text-[16px] text-[#8a8f8c] md:text-[18px] lg:text-[20px]">© Diplomarbeit 26-27</p>
-		<a href="/about" class="text-[16px] text-[#35c9b8] md:text-[20px] lg:text-[22px]">about</a>
-	</div>
-</footer>
