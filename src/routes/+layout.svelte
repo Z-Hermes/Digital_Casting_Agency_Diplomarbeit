@@ -5,7 +5,8 @@
 	import Nav from '$lib/components/Nav.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 
-	let { children } = $props();
+	// data.user comes from +layout.server.js (null when nobody is logged in)
+	let { data, children } = $props();
 
 	// pages that should NOT show the navbar and footer
 	const noNavPages = ['/login', '/register'];
@@ -14,7 +15,7 @@
 
 <div class="flex min-h-screen flex-col bg-[#101413] font-['Segoe_UI',system-ui,sans-serif] text-[#f2f2f0]">
 	{#if showNav}
-		<Nav />
+		<Nav user={data.user} />
 	{/if}
 
 	<!-- flex-1 pushes the footer to the bottom on short pages -->
@@ -36,9 +37,9 @@
 
 	/* hide all scrollbars (scrolling still works) */
 	:global(*) {
-		scrollbar-width: none; /* Firefox, Chrome, Edge */
+		scrollbar-width: none;
 	}
 	:global(*::-webkit-scrollbar) {
-		display: none; /* Safari, older Chrome */
+		display: none;
 	}
 </style>
