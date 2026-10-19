@@ -66,20 +66,14 @@
 	{:else}
 		<div class="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 			{#each data.actors as actor}
-				<a
-					href="/user/{actor.username}"
-					class="overflow-hidden rounded-[20px] border border-[#2a302d] bg-[#1b201d] transition hover:border-teal-400"
-				>
-					<Img src={actor.avatar_url} alt={actor.name} class="h-[220px] w-full object-cover" />
-					
-					<div class="p-4">
-						<h3 class="text-[20px]">{actor.name}</h3>
-						<p class="mt-1 text-[14px] text-[#8a8f8c]">{actor.city ?? 'Unknown city'}</p>
-						<span class="mt-3 inline-block rounded-full border border-[#2f8f5b] bg-[#12301f] px-3 py-1 text-[13px]">
-							{statusLabels[actor.availability] ?? actor.availability}
-						</span>
-					</div>
-				</a>
+				<ActorCard
+   					variant="database"
+   					name={actor.name}
+   					age={actor.age}
+   					status={actor.availability}
+   					image={actor.avatar_url}
+   					href="/user/{actor.username}"
+   				/>
 			{/each}
 		</div>
 	{/if}
