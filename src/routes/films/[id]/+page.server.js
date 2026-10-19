@@ -3,7 +3,8 @@ import { db } from '$lib/server/database.js';
 
 export async function load({ params }) {
   const [filmRows] = await db.execute(
-    `SELECT id, title, year, description, poster_url, trailer_url, published
+    `SELECT id, title, year, description, poster_url, trailer_url, published,
+     stage, casting_deadline
      FROM films
      WHERE id = ?`,
     [params.id]
