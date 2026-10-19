@@ -8,7 +8,8 @@ export async function load({ url }) {
 
   let query = `
     SELECT u.id, u.username, u.name, u.avatar_url,
-           ap.city, ap.gender, ap.availability
+          ap.city, ap.gender, ap.availability,
+           TIMESTAMPDIFF(YEAR, ap.birth_date, CURDATE()) AS age
     FROM users u
     JOIN actor_profiles ap ON ap.user_id = u.id
     WHERE u.role = 'actor' AND u.blocked = 0

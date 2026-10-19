@@ -1,15 +1,8 @@
-<script>
-	import defaultPfp from '$lib/assets/default-pfp.png';
-	import Img from '$lib/components/Img.svelte';
+   <script>
+   	import ActorCard from '$lib/components/ActorCard.svelte';
 
-	let { data } = $props();
-
-	const statusLabels = {
-		available: 'Available',
-		on_set: 'On set',
-		booked: 'Booked'
-	};
-</script>
+   	let { data } = $props();
+   </script>
 
 <svelte:head>
 	<title>Actors | HD Studios</title>

@@ -1,12 +1,12 @@
 <script>
-	import defaultPfp from '$lib/assets/default-pfp.png';
+   	import ActorCard from '$lib/components/ActorCard.svelte';
 	import landingImage from '$lib/assets/landing-page.jpg';
 
 	// Later this list can come from the database (+page.server.js)
 	const actors = [
 		{ name: 'Tom Hanks', age: 69, status: 'Booked' },
 		{ name: 'Hugh Jackman', age: 57, status: 'Booked' },
-		{ name: 'Scarlett Johanssen', age: 41, status: 'Booked' },
+		{ name: 'Scarlett Johansson', age: 41, status: 'Booked' },
 		{ name: 'Jennifer Aniston', age: 57, status: 'Booked' }
 	];
 </script>
@@ -47,31 +47,12 @@
 		<!-- scrolls sideways when there are more cards -->
 		<div class="flex gap-4 overflow-x-auto pb-2">
 			{#each actors as actor}
-				<article
-					class="flex-none basis-[230px] overflow-hidden rounded-[25px] border border-[#2a302d] bg-[#1b201d] md:basis-[200px] lg:basis-[269px]"
-				>
-					<img
-						src={defaultPfp}
-						alt={actor.name}
-						class="block h-[200px] w-full object-cover md:h-[170px] lg:h-[200px]"
-					/>
-
-					<!-- -mt-3 makes the box overlap the photo like in the mockup -->
-					<div class="relative -mt-3 rounded-t-[25px] bg-[#1b201d] px-5 pt-[18px] pb-5 md:px-4 md:pt-4 md:pb-4 lg:px-5 lg:pt-[18px] lg:pb-5">
-						<h3 class="text-[26px] md:text-[19px] lg:text-[26px]">{actor.name}</h3>
-						<p class="mt-0.5 mb-3 text-[24px] md:text-[17px] lg:text-[24px]">{actor.age} years old</p>
-
-						<div class="flex items-center justify-between">
-							<span class="rounded-full border border-[#2f8f5b] bg-[#12301f] px-3 py-1 text-[15px] md:text-[13px] lg:text-[15px]">
-								{actor.status}
-							</span>
-							<button
-								class="cursor-pointer text-[28px] leading-none font-bold text-[#35c9b8]"
-								aria-label="More options">...</button
-							>
-						</div>
-					</div>
-				</article>
+				<ActorCard
+   					name={actor.name}
+   					age={actor.age}
+   					status={actor.status}
+   					class="flex-none basis-[230px] md:basis-[200px] lg:basis-[269px]"
+   				/>
 			{/each}
 		</div>
 	</div>

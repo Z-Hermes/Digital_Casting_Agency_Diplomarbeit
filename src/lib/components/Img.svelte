@@ -1,18 +1,15 @@
 <script>
+	// Any image with a fallback: if src is empty or fails to load,
+	// the fallback (default-pfp) is shown instead.
+	// Use:  <Img src={film.poster_url} alt={film.title} class="h-[280px] w-full object-cover" />
 	import defaultPfp from '$lib/assets/default-pfp.png';
 
 	let { src, alt = '', class: className = '', fallback = defaultPfp, ...rest } = $props();
 
-	let currentSrc = $state(src || fallback);
+	// remembers which src failed to load (a new src gets a fresh try)
+	let failedSrc = $state(null);
 
-	// if the src prop changes (e.g. different actor in a list), reset
-	$effect(() => {
-		currentSrc = src || fallback;
-	});
-
-	function handleError() {
-		currentSrc = fallback;
-	}
+	let currentSrc = $derived(!src || src === failedSrc ? fallback : src);
 </script>
 
-<img src={currentSrc} alt={alt} class={className} onerror={handleError} {...rest} />
+<img src={currentSrc} {alt} class={className} onerror={() => (failedSrc = src)} {...rest} />
