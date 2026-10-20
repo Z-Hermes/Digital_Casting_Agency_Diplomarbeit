@@ -138,7 +138,9 @@ CREATE TABLE IF NOT EXISTS films (
   year        INT,
   description TEXT,
   poster_url  VARCHAR(500),
-  trailer_url VARCHAR(500),                       -- YouTube link
+  trailer_url VARCHAR(500),
+  stage       ENUM('coming_soon','casting','in_production','released') NOT NULL DEFAULT 'released',
+  casting_deadline DATE,                     -- YouTube link
   published   TINYINT(1)   NOT NULL DEFAULT 1,
   created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   KEY idx_films_published_year (published, year)
