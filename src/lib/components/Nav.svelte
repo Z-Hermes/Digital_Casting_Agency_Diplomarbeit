@@ -40,6 +40,12 @@
 				<a href="/news" onclick={close} class="hover:text-[#35c9b8]">News</a>
 				<a href="/films" onclick={close} class="hover:text-[#35c9b8]">Films</a>
 
+                
+				<!-- only admins see this link -->
+				{#if user?.role === 'admin'}
+					<a href="/admin/actors" onclick={close} class="text-[#35c9b8] hover:underline">Admin</a>
+				{/if}
+                
 				{#if user}
 					<form method="POST" action="/logout">
 						<button

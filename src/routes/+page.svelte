@@ -2,13 +2,8 @@
    	import ActorCard from '$lib/components/ActorCard.svelte';
 	import landingImage from '$lib/assets/landing-page.jpg';
 
-	// Later this list can come from the database (+page.server.js)
-	const actors = [
-		{ name: 'Tom Hanks', age: 69, status: 'Booked' },
-		{ name: 'Hugh Jackman', age: 57, status: 'Booked' },
-		{ name: 'Scarlett Johansson', age: 41, status: 'Booked' },
-		{ name: 'Jennifer Aniston', age: 57, status: 'Booked' }
-	];
+	// featured actors come from +page.server.js (most bookings first)
+   	let { data } = $props();
 </script>
 
 <!--
@@ -46,14 +41,18 @@
 
 		<!-- scrolls sideways when there are more cards -->
 		<div class="flex gap-4 overflow-x-auto pb-2">
-			{#each actors as actor}
-				<ActorCard
+			   			{#each data.actors as actor}
+   				<ActorCard
    					name={actor.name}
    					age={actor.age}
-   					status={actor.status}
+   					status={actor.availability}
+   					image={actor.avatar_url}
+   					href="/user/{actor.username}"
    					class="flex-none basis-[230px] md:basis-[200px] lg:basis-[269px]"
    				/>
-			{/each}
+   			{:else}
+   				<p class="text-[#8a8f8c]">No actors yet.</p>
+   			{/each}
 		</div>
 	</div>
 </section>
