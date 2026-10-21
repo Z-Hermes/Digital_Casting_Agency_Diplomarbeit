@@ -1,15 +1,21 @@
 -- ============================================================================
---  HD STUDIOS - DATABASE SCHEMA
+--  HD STUDIOS - DATABASE SCHEMA  (structure only, no demo data)
+--
+--  Demo data lives in db/seed.sql. Run order: schema.sql -> seed.sql
+--  All statements use IF NOT EXISTS, so this file is safe to run again.
+--  (It does NOT change tables that already exist. See the migration note
+--  at the bottom if you are updating an existing database.)
+-- ============================================================================
+
+-- CREATE DATABASE IF NOT EXISTS donvat22_hd_studios
+--   DEFAULT CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE donvat22_hd_studios;
 
 -- ----------------------------------------------------------------------------
 --  1. users  -  every person on the platform
 --     username is used in the public profile URL:  /user/[username]
 --     (allowed characters are checked in the register code: a-z 0-9 _ -)
 -- ----------------------------------------------------------------------------
-
-create database donvat22_hd_studios;
-use database donvat22_hd_studios;
-
 CREATE TABLE IF NOT EXISTS users (
   id            INT AUTO_INCREMENT PRIMARY KEY,
   username      VARCHAR(40)  NOT NULL,
@@ -128,22 +134,29 @@ CREATE TABLE IF NOT EXISTS media (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------------------------------------------------------
---  8. films + film_cast  -  the platform's own film pages
---     /films, /films/[id], /admin/films
+--  8. films + film_cast + film_applications
+--     The platform's own film pages: /films, /films/[id], /admin/films
 --     published = 0 hides a film from the public pages (draft).
+--     stage tells where the production is:
+--       coming_soon   announced, not casting yet
+--       casting       open for applications (until casting_deadline)
+--       in_production shooting
+--       released      finished (default for old films)
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS films (
-  id          INT AUTO_INCREMENT PRIMARY KEY,
-  title       VARCHAR(150) NOT NULL,
-  year        INT,
-  description TEXT,
-  poster_url  VARCHAR(500),
-  trailer_url VARCHAR(500),
-  stage       ENUM('coming_soon','casting','in_production','released') NOT NULL DEFAULT 'released',
-  casting_deadline DATE,                     -- YouTube link
-  published   TINYINT(1)   NOT NULL DEFAULT 1,
-  created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  KEY idx_films_published_year (published, year)
+  id               INT AUTO_INCREMENT PRIMARY KEY,
+  title            VARCHAR(150) NOT NULL,
+  year             INT,
+  description      TEXT,
+  poster_url       VARCHAR(500),
+  trailer_url      VARCHAR(500),                  -- YouTube link
+  stage            ENUM('coming_soon','casting','in_production','released')
+                                NOT NULL DEFAULT 'released',
+  casting_deadline DATE,                          -- last day for applications
+  published        TINYINT(1)   NOT NULL DEFAULT 1,
+  created_at       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_films_published_year (published, year),
+  KEY idx_films_stage          (stage, casting_deadline)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS film_cast (
@@ -153,6 +166,21 @@ CREATE TABLE IF NOT EXISTS film_cast (
   PRIMARY KEY (film_id, actor_id),
   FOREIGN KEY (film_id)  REFERENCES films(id) ON DELETE CASCADE,
   FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Applications of actors for a film that is in stage 'casting'.
+-- (Separate from the messages table, which is tied to jobs and conversations.)
+CREATE TABLE IF NOT EXISTS film_applications (
+  id         INT AUTO_INCREMENT PRIMARY KEY,
+  film_id    INT NOT NULL,
+  actor_id   INT NOT NULL,
+  message    TEXT,
+  status     ENUM('pending','accepted','declined') NOT NULL DEFAULT 'pending',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_film_application (film_id, actor_id),   -- one application per film
+  FOREIGN KEY (film_id)  REFERENCES films(id) ON DELETE CASCADE,
+  FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE CASCADE,
+  KEY idx_film_applications_status (film_id, status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------------------------------------------------------
@@ -196,7 +224,7 @@ CREATE TABLE IF NOT EXISTS conversations (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------------------------------------------------------
---  11. messages  -  ONE table for chat, invitations and applications.
+--  11. messages  -  ONE table for chat, invitations and job applications.
 --      type says what kind of row it is:
 --        'message'     normal chat message or reply    (status NULL, job_id NULL)
 --        'invitation'  director/producer -> actor ("Express interest"),
@@ -304,3 +332,19 @@ CREATE TABLE IF NOT EXISTS recommendations (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   KEY idx_recommendations_user_score (user_id, score)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================================
+--  MIGRATION NOTE  (only for a database that already exists)
+--
+--  CREATE TABLE IF NOT EXISTS does not change existing tables. If your films
+--  table was created before stage / casting_deadline existed, run these once:
+--
+--    ALTER TABLE films
+--      ADD COLUMN stage ENUM('coming_soon','casting','in_production','released')
+--                       NOT NULL DEFAULT 'released' AFTER trailer_url,
+--      ADD COLUMN casting_deadline DATE NULL AFTER stage;
+--    ALTER TABLE films ADD KEY idx_films_stage (stage, casting_deadline);
+--
+--  The old column films.is_upcoming is replaced by stage. If it exists you
+--  can remove it:   ALTER TABLE films DROP COLUMN is_upcoming;
+-- ============================================================================
