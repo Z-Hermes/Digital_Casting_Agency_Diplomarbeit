@@ -1,9 +1,10 @@
 import { fail, redirect } from '@sveltejs/kit';
 import bcrypt from 'bcrypt';
 import { db } from '$lib/server/database.js';
+import { login } from '$lib/server/auth.js';
 
 export const actions = {
-  register: async ({ request }) => {
+  register: async ({ request , cookies }) => {
     const form = await request.formData();
     const name = form.get('name');
     const username = form.get('username');
@@ -20,6 +21,14 @@ export const actions = {
     if (password.length < 6) {
       return fail(400, {
         error: 'Password must be at least 6 characters.'
+      });
+    }
+
+    
+    // only these roles can be chosen when registering (never 'admin')
+    if (!['actor', 'producer', 'director', 'spectator'].includes(role)) {
+      return fail(400, {
+        error: 'Please choose a valid role.'
       });
     }
 
@@ -42,6 +51,17 @@ export const actions = {
       [username, email, passwordHash, name, role]
     );
 
-    throw redirect(303, '/login');
+        // log the new user in right away (same as the login page does)
+    const result = await login(username, password);
+
+    cookies.set('session', result.sessionId, {
+      path: '/',
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: false,
+      maxAge: 60 * 60 * 24 * 7
+    });
+
+    throw redirect(303, '/');
   }
 };

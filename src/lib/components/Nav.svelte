@@ -45,7 +45,7 @@
 				{#if user?.role === 'admin'}
 					<a href="/admin/actors" onclick={close} class="text-[#35c9b8] hover:underline">Admin</a>
 				{/if}
-                
+
 				{#if user}
 					<form method="POST" action="/logout">
 						<button
@@ -67,7 +67,7 @@
 			</nav>
 
 			<!-- profile picture: the user's own photo, or the default one -->
-			<a href={user ? '/dashboard' : '/login'} onclick={close}>
+			<a href={user ? `/user/${user.username}` : '/login'} onclick={close}>
 				<Avatar
 					src={user?.avatar_url}
 					alt={user ? user.name : 'Log in'}
