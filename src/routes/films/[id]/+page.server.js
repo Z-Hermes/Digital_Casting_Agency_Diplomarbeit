@@ -16,11 +16,13 @@ export async function load({ params, locals }) {
     WHERE fc.film_id = ?
   `, [params.id]);
 
+  // has the logged-in actor already applied? (applications are stored as messages)
   let application = null;
   if (locals.user) {
     const [rows] = await db.execute(
-      'SELECT status FROM film_applications WHERE film_id = ? AND actor_id = ?',
-      [params.id, locals.user.id]
+      `SELECT status FROM messages
+       WHERE sender_id = ? AND film_id = ? AND type = 'application'`,
+      [locals.user.id, params.id]
     );
     application = rows[0] ?? null;
   }
@@ -30,19 +32,24 @@ export async function load({ params, locals }) {
 
 export const actions = {
   apply: async ({ request, params, locals }) => {
-    if (!locals.user) return redirect(303, '/login');
+    if (!locals.user) redirect(303, '/login');
 
     if (locals.user.role !== 'actor') {
       return fail(403, { error: 'Nur Schauspieler können sich bewerben.' });
     }
 
     const [films] = await db.execute(
-      'SELECT title, stage, casting_deadline FROM films WHERE id = ? AND published = 1',
+      `SELECT id, title, stage, casting_deadline, producer_id
+       FROM films WHERE id = ? AND published = 1`,
       [params.id]
     );
     const film = films[0];
 
     if (!film) return fail(404, { error: 'Film nicht gefunden.' });
+
+    if (!film.producer_id) {
+      return fail(400, { error: 'Für diesen Film ist noch kein Producer eingetragen.' });
+    }
 
     const today = new Date().toISOString().slice(0, 10);
     const deadline = film.casting_deadline
@@ -54,36 +61,23 @@ export const actions = {
     }
 
     const data = await request.formData();
-    const message = data.get('message')?.toString().trim() ?? '';
+    let message = data.get('message')?.toString().trim() ?? '';
 
     if (message.length > 1000) {
       return fail(400, { error: 'Die Nachricht ist zu lang (max. 1000 Zeichen).' });
     }
 
+    // the inbox preview needs a text, so use a default if the actor wrote nothing
+    if (!message) message = `Ich möchte mich für "${film.title}" bewerben.`;
+
+    const actorId = locals.user.id;
+    const producerId = film.producer_id;
+
+    // one conversation per pair of people: the smaller id always goes first
+    const userOne = Math.min(actorId, producerId);
+    const userTwo = Math.max(actorId, producerId);
+
     try {
-      // 1. In film_applications speichern
-      await db.execute(
-        'INSERT IGNORE INTO film_applications (film_id, actor_id, message) VALUES (?, ?, ?)',
-        [params.id, locals.user.id, message]
-      );
-
-      // 2. Passenden Job (ID und created_by) anhand des Filmtitels ermitteln
-      const [jobRows] = await db.execute(
-        'SELECT id, created_by FROM jobs WHERE title LIKE ? LIMIT 1',
-        [`%${film.title}%`]
-      );
-      
-      const jobId = jobRows.length > 0 ? jobRows[0].id : null;
-      const recipientId = jobRows.length > 0 && jobRows[0].created_by ? jobRows[0].created_by : 12;
-
-      if (recipientId === locals.user.id) {
-        return { success: true };
-      }
-
-      const userOne = Math.min(locals.user.id, recipientId);
-      const userTwo = Math.max(locals.user.id, recipientId);
-
-      // 3. Konversation sicherstellen
       await db.execute(
         'INSERT IGNORE INTO conversations (user_one_id, user_two_id) VALUES (?, ?)',
         [userOne, userTwo]
@@ -95,25 +89,21 @@ export const actions = {
       );
       const conversationId = convRows[0].id;
 
-      // 4. Nachricht mit der korrekten job_id (oder NULL) einfügen
+      // the unique key (sender_id, film_id, type) blocks a second application
       await db.execute(
-        `INSERT INTO messages (conversation_id, sender_id, recipient_id, job_id, type, subject, body, status, created_at) 
-         VALUES (?, ?, ?, ?, 'application', ?, ?, 'pending', NOW())`,
-        [
-          conversationId, 
-          locals.user.id, 
-          recipientId,
-          jobId, 
-          `Bewerbung: ${film.title}`, 
-          message || 'Keine Nachricht angegeben.'
-        ]
+        `INSERT INTO messages
+           (conversation_id, sender_id, recipient_id, film_id, type, subject, body, status)
+         VALUES (?, ?, ?, ?, 'application', ?, ?, 'pending')`,
+        [conversationId, actorId, producerId, film.id, `Bewerbung: ${film.title}`, message]
       );
 
+      return { success: true, conversationId };
     } catch (err) {
+      if (err.code === 'ER_DUP_ENTRY') {
+        return fail(400, { error: 'Du hast dich bereits beworben.' });
+      }
       console.error(err);
       return fail(500, { error: 'Fehler beim Speichern der Bewerbung.' });
     }
-
-    return { success: true };
   }
 };
