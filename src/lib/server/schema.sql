@@ -7,8 +7,10 @@
 --  at the bottom if you are updating an existing database.)
 -- ============================================================================
 
--- CREATE DATABASE IF NOT EXISTS donvat22_hd_studios
---   DEFAULT CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- FULL REBUILD: uncomment the next line to wipe everything (users, sessions, ...)
+-- DROP DATABASE IF EXISTS donvat22_hd_studios;
+CREATE DATABASE IF NOT EXISTS donvat22_hd_studios
+  DEFAULT CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE donvat22_hd_studios;
 
 -- ----------------------------------------------------------------------------
@@ -134,7 +136,7 @@ CREATE TABLE IF NOT EXISTS media (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------------------------------------------------------
---  8. films + film_cast + film_applications
+--  8. films + film_cast
 --     The platform's own film pages: /films, /films/[id], /admin/films
 --     published = 0 hides a film from the public pages (draft).
 --     stage tells where the production is:
@@ -153,8 +155,10 @@ CREATE TABLE IF NOT EXISTS films (
   stage            ENUM('coming_soon','casting','in_production','released')
                                 NOT NULL DEFAULT 'released',
   casting_deadline DATE,                          -- last day for applications
+  producer_id      INT,                           -- gets the applications in his inbox
   published        TINYINT(1)   NOT NULL DEFAULT 1,
   created_at       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (producer_id) REFERENCES users(id) ON DELETE SET NULL,
   KEY idx_films_published_year (published, year),
   KEY idx_films_stage          (stage, casting_deadline)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -168,20 +172,8 @@ CREATE TABLE IF NOT EXISTS film_cast (
   FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Applications of actors for a film that is in stage 'casting'.
--- (Separate from the messages table, which is tied to jobs and conversations.)
-CREATE TABLE IF NOT EXISTS film_applications (
-  id         INT AUTO_INCREMENT PRIMARY KEY,
-  film_id    INT NOT NULL,
-  actor_id   INT NOT NULL,
-  message    TEXT,
-  status     ENUM('pending','accepted','declined') NOT NULL DEFAULT 'pending',
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE KEY uq_film_application (film_id, actor_id),   -- one application per film
-  FOREIGN KEY (film_id)  REFERENCES films(id) ON DELETE CASCADE,
-  FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE CASCADE,
-  KEY idx_film_applications_status (film_id, status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- Applications for a film are stored in the messages table (type 'application',
+-- film_id filled in) so they show up in the producer's inbox.
 
 -- ----------------------------------------------------------------------------
 --  9. jobs  -  job posts written by directors and producers
@@ -229,7 +221,10 @@ CREATE TABLE IF NOT EXISTS conversations (
 --        'message'     normal chat message or reply    (status NULL, job_id NULL)
 --        'invitation'  director/producer -> actor ("Express interest"),
 --                      job_id optional
---        'application' actor -> job owner, job_id filled in
+--        'application' actor -> job owner (job_id filled in)
+--                      or actor -> film producer (film_id filled in)
+--        'notice'      automatic note "your application was accepted" for the
+--                      person who receives it (hidden from the one who answered)
 --      status is only used for invitation and application:
 --        'pending' (waiting for an answer), 'accepted' or 'declined'
 --      RULE: job_id is only filled for invitation/application, never for chat
@@ -245,17 +240,20 @@ CREATE TABLE IF NOT EXISTS messages (
   sender_id       INT NOT NULL,
   recipient_id    INT NOT NULL,
   job_id          INT,
-  type            ENUM('message','invitation','application') NOT NULL DEFAULT 'message',
+  film_id         INT,
+  type            ENUM('message','invitation','application','notice') NOT NULL DEFAULT 'message',
   subject         VARCHAR(150),                   -- optional, chat replies have none
   body            TEXT,                           -- optional
   status          ENUM('pending','accepted','declined'),
   read_at         DATETIME,                       -- NULL means the message is unread
   created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY uq_messages_request (sender_id, recipient_id, job_id, type),
+  UNIQUE KEY uq_messages_film_request (sender_id, film_id, type),   -- one application per film
   FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
   FOREIGN KEY (sender_id)       REFERENCES users(id)         ON DELETE CASCADE,
   FOREIGN KEY (recipient_id)    REFERENCES users(id)         ON DELETE CASCADE,
   FOREIGN KEY (job_id)          REFERENCES jobs(id)          ON DELETE SET NULL,
+  FOREIGN KEY (film_id)         REFERENCES films(id)         ON DELETE SET NULL,
   KEY idx_messages_unread       (recipient_id, read_at),          -- unread counts
   KEY idx_messages_conversation (conversation_id, created_at),    -- chat history
   KEY idx_messages_type_status  (recipient_id, type, status)      -- invitations page
@@ -347,4 +345,27 @@ CREATE TABLE IF NOT EXISTS recommendations (
 --
 --  The old column films.is_upcoming is replaced by stage. If it exists you
 --  can remove it:   ALTER TABLE films DROP COLUMN is_upcoming;
+-- ============================================================================
+
+-- ============================================================================
+--  MIGRATION NOTE 2  (film applications in the inbox, existing database only)
+--
+--    ALTER TABLE films
+--      ADD COLUMN producer_id INT NULL AFTER casting_deadline,
+--      ADD CONSTRAINT fk_films_producer FOREIGN KEY (producer_id)
+--          REFERENCES users(id) ON DELETE SET NULL;
+--    ALTER TABLE messages
+--      ADD COLUMN film_id INT NULL AFTER job_id,
+--      ADD CONSTRAINT fk_messages_film FOREIGN KEY (film_id)
+--          REFERENCES films(id) ON DELETE SET NULL,
+--      ADD UNIQUE KEY uq_messages_film_request (sender_id, film_id, type);
+--    DROP TABLE IF EXISTS film_applications;
+-- ============================================================================
+
+-- ============================================================================
+--  MIGRATION NOTE 3  (accept / decline notices, existing database only)
+--
+--    ALTER TABLE messages
+--      MODIFY type ENUM('message','invitation','application','notice')
+--      NOT NULL DEFAULT 'message';
 -- ============================================================================

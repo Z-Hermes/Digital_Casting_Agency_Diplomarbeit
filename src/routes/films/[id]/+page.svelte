@@ -73,6 +73,14 @@
                         <p class="mt-4 text-[14px] text-[#35c9b8] font-medium">
                             ✓ You have applied for this production (Status: {data.application.status})
                         </p>
+                        {#if form?.conversationId}
+                            <a
+                                href="/messages/{form.conversationId}"
+                                class="mt-2 inline-block text-[14px] text-[#35c9b8] underline hover:text-[#5fd8ca]"
+                            >
+                                Open conversation with the producer
+                            </a>
+                        {/if}
                     {:else if data.user?.role === 'actor'}
                         <button
                             type="button"
@@ -91,16 +99,13 @@
                     {/if}
 
                     <!-- Bewerbungsformular (wird eingeblendet, wenn geklickt) -->
-                    {#if showApplyModal}
+                    {#if showApplyModal && !data.application}
                         <form method="POST" action="?/apply" use:enhance class="mt-4 flex flex-col gap-3">
                             {#if form?.error}
                                 <p class="text-red-400 text-[14px]">{form.error}</p>
                             {/if}
-                            {#if form?.success}
-                                <p class="text-teal-400 text-[14px]">Successfully applied!</p>
-                            {/if}
 
-                            <label class="text-[14px] text-[#a9b0ab]" for="message">Message to the casting director (optional):</label>
+                            <label class="text-[14px] text-[#a9b0ab]" for="message">Message to the producer (optional):</label>
                             <textarea
                                 id="message"
                                 name="message"
