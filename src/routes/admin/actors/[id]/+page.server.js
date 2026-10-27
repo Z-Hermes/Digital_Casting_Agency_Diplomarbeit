@@ -1,6 +1,7 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { db } from '$lib/server/database.js';
 import { requireAdmin } from '$lib/server/admin.js';
+import { loadPhotos, uploadAvatar, removeAvatar, uploadGallery, deletePhoto } from '$lib/server/photos.js';
 
 export async function load({ locals, params }) {
 	requireAdmin(locals);
@@ -21,7 +22,16 @@ export async function load({ locals, params }) {
 		error(404, 'Actor not found');
 	}
 
-	return { actor };
+		return { actor, ...(await loadPhotos(actor.id)) };
+}
+
+// makes sure the id in the URL belongs to an actor
+async function requireActor(id) {
+	const [rows] = await db.execute(`SELECT id FROM users WHERE id = ? AND role = 'actor'`, [id]);
+	if (rows.length === 0) {
+		error(404, 'Actor not found');
+	}
+}
 }
 
 // empty text field -> NULL in the database
@@ -37,7 +47,7 @@ function numberOrNull(value) {
 }
 
 export const actions = {
-	default: async ({ request, locals, params }) => {
+	save: async ({ request, locals, params }) => {
 		requireAdmin(locals);
 
 		const form = await request.formData();
