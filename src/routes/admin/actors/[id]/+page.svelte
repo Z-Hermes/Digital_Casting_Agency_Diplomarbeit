@@ -1,6 +1,7 @@
 <script>
 	import { page } from '$app/state';
 	import Avatar from '$lib/components/Avatar.svelte';
+	import PhotoManager from '$lib/components/PhotoManager.svelte';
 
 	let { data, form } = $props();
 
@@ -41,6 +42,11 @@
 			{form.error}
 		</p>
 	{/if}
+
+		<!-- ===== Photos ===== -->
+	<div class="mt-8">
+		<PhotoManager name={data.actor.name} avatarUrl={data.avatarUrl} photos={data.photos} {form} />
+	</div>
 
 	<form method="POST" class="mt-8 flex flex-col gap-8">
 		<!-- ===== Account ===== -->

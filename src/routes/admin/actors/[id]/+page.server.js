@@ -32,7 +32,7 @@ async function requireActor(id) {
 		error(404, 'Actor not found');
 	}
 }
-}
+
 
 // empty text field -> NULL in the database
 function textOrNull(value) {
@@ -133,6 +133,30 @@ export const actions = {
 			]
 		);
 
-		redirect(303, `/admin/actors/${params.id}?saved=1`);
+			redirect(303, `/admin/actors/${params.id}?saved=1`);
+	},
+
+	avatar: async ({ request, locals, params }) => {
+		requireAdmin(locals);
+		await requireActor(params.id);
+			return uploadAvatar(params.id, await request.formData());
+	},
+
+	removeAvatar: async ({ locals, params }) => {
+		requireAdmin(locals);
+		await requireActor(params.id);
+				return removeAvatar(params.id);
+	},
+
+	gallery: async ({ request, locals, params }) => {
+		requireAdmin(locals);
+		await requireActor(params.id);
+				return uploadGallery(params.id, await request.formData());
+	},
+
+	deletePhoto: async ({ request, locals, params }) => {
+		requireAdmin(locals);
+		await requireActor(params.id);
+		return deletePhoto(params.id, await request.formData());
 	}
 };
