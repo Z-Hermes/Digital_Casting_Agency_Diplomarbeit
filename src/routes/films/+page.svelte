@@ -20,6 +20,15 @@
     <h1 class="text-[32px] md:text-[42px]">Films</h1>
     <div class="mt-3 h-1 w-24 rounded-full bg-[#35c9b8]"></div>
 
+    {#if data.user && ['director', 'producer', 'admin'].includes(data.user.role)}
+	<a
+		href="/films/new"
+		class="rounded-lg bg-teal-400 px-4 py-2 font-medium text-[#032624] hover:bg-teal-300"
+	>
+		Add film
+	</a>
+{/if}
+
     {#if sections.length === 0}
         <p class="mt-10 text-[#8a8f8c]">No films yet.</p>
     {:else}
