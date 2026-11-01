@@ -1,4 +1,6 @@
 <script>
+    import { enhance } from '$app/forms';
+
     let { form } = $props();
 
     let username = $state('');
@@ -68,7 +70,7 @@
 					<p class="mt-4 text-center text-sm text-red-400">{form.error}</p>
 				{/if}
 
-				<form method="POST" class="mt-7 space-y-3" action="?/register">
+				<form method="POST" class="mt-7 space-y-3" action="?/register" use:enhance>
 
 					<input
 						name="name"
@@ -84,7 +86,11 @@
 						type="text"
 						bind:value={username}
 						required
-						placeholder="Username"
+						minlength="3"
+						maxlength="40"
+						pattern="[A-Za-z0-9_\-]+"
+						title="3-40 characters: letters, numbers, _ and - (no spaces)"
+						placeholder="Username (no spaces)"
 						class="w-full rounded-lg border border-white/10 bg-[#162322] px-4 py-3 text-white outline-none transition placeholder:text-gray-400 focus:border-teal-400"
 					/>
 
