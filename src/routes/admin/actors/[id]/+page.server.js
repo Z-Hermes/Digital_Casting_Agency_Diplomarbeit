@@ -2,6 +2,9 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import { db } from '$lib/server/database.js';
 import { requireAdmin } from '$lib/server/admin.js';
 import { loadPhotos, uploadAvatar, removeAvatar, uploadGallery, deletePhoto } from '$lib/server/photos.js';
+import bcrypt from 'bcrypt';
+import crypto from 'node:crypto';
+import { sendMessage } from '$lib/server/inbox.js';
 
 export async function load({ locals, params }) {
 	requireAdmin(locals);
@@ -157,6 +160,29 @@ export const actions = {
 	deletePhoto: async ({ request, locals, params }) => {
 		requireAdmin(locals);
 		await requireActor(params.id);
-		return deletePhoto(params.id, await request.formData());
+			return deletePhoto(params.id, await request.formData());
+	},
+
+	resetPassword: async ({ locals, params }) => {
+		requireAdmin(locals);
+		await requireActor(params.id);
+
+		// random new password, e.g. "q7Xk-2Pa"
+		const newPassword = crypto.randomBytes(6).toString('base64url');
+		const passwordHash = await bcrypt.hash(newPassword, 10);
+
+		await db.execute('UPDATE users SET password_hash = ? WHERE id = ?', [passwordHash, params.id]);
+
+		// log the user out everywhere, the old password no longer works
+		await db.execute('DELETE FROM sessions WHERE user_id = ?', [params.id]);
+
+		await sendMessage(
+			locals.user.id,
+			Number(params.id),
+			'Your password was reset',
+			`Hello, an admin has reset your password.\nYour new password is: ${newPassword}\nPlease keep it safe.`
+		);
+
+		return { newPassword };
 	}
 };

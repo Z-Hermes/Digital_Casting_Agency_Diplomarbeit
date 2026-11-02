@@ -48,6 +48,38 @@
 		<PhotoManager name={data.actor.name} avatarUrl={data.avatarUrl} photos={data.photos} {form} />
 	</div>
 
+	
+	<!-- ===== Password ===== -->
+	<div class="mt-8 rounded-[15px] border border-[#2e332f] bg-[#1b201d] p-5 md:p-6">
+		<h2 class="text-[18px]">Password</h2>
+		<p class="mt-1 text-[14px] text-[#8a8f8c]">
+			Creates a new random password, logs the actor out and sends the password to their inbox.
+		</p>
+
+		{#if form?.newPassword}
+			<p class="mt-4 rounded-[10px] border border-[#35c9b8]/60 bg-[#0f2523] px-4 py-3 text-[15px]" role="status">
+				New password: <code class="text-[#35c9b8]">{form.newPassword}</code><br />
+				It was sent to {data.actor.name}'s inbox. Write it down, it is only shown once.
+			</p>
+		{/if}
+
+		<form
+			method="POST"
+			action="?/resetPassword"
+			class="mt-4"
+			onsubmit={(event) => {
+				if (!confirm(`Reset the password of ${data.actor.name}?`)) event.preventDefault();
+			}}
+		>
+			<button
+				type="submit"
+				class="cursor-pointer rounded-lg border border-[#e05a5a] px-4 py-2 text-[14px] text-[#f5c4c4] hover:bg-[#3a1414]"
+			>
+				Reset password
+			</button>
+		</form>
+	</div>
+
 	<form method="POST" class="mt-8 flex flex-col gap-8">
 		<!-- ===== Account ===== -->
 		<fieldset class="rounded-[15px] border border-[#2e332f] bg-[#1b201d] p-5 md:p-6">

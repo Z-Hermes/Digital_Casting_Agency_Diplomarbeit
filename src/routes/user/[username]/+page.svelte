@@ -42,6 +42,17 @@
 			<h1 class="text-[36px] md:text-[42px]">{data.profile.name}</h1>
 			<p class="text-[16px] text-[#8a8f8c]">@{data.profile.username}</p>
 
+			
+			<!-- only on your own profile -->
+			{#if data.user?.username === data.profile.username}
+				<a
+					href="/my-photos"
+					class="mt-3 inline-block rounded-lg border border-[#35c9b8] px-4 py-2 text-[14px] text-[#35c9b8] transition-colors hover:bg-[#084a43]"
+				>
+					Manage photos
+				</a>
+			{/if}
+
 			<div class="mt-5 grid grid-cols-2 gap-x-8 gap-y-2 text-[15px] text-[#c7cdc9] sm:grid-cols-3">
 				{#if data.profile.city}<p><span class="text-[#8a8f8c]">City:</span> {data.profile.city}</p>{/if}
 				{#if age(data.profile.birth_date)}<p><span class="text-[#8a8f8c]">Age:</span> {age(data.profile.birth_date)}</p>{/if}
