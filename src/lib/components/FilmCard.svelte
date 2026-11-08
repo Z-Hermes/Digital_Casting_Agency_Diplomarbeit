@@ -1,10 +1,13 @@
 <script>
 	// Poster card for a film.
 	// Films page:  <FilmCard title={film.title} year={film.year} image={film.poster_url}
-	//                        stage={film.stage} deadline={film.casting_deadline} href="/films/{film.id}" />
+	//                        stage={film.stage} deadline={film.casting_deadline}
+	//                        application={data.applications?.[film.id]} href="/films/{film.id}" />
 	// Credits:     <FilmCard size="small" title={credit.title} year={credit.year}
 	//                        role={credit.role_name} image={credit.poster_url} />
 	// Without href the card is not clickable (credits are not always films on the platform).
+	// application: 'pending' | 'accepted' | 'declined' = the logged-in actor applied for this film.
+	import { page } from '$app/state';
 	import filmRoll from '$lib/assets/film_roll_teal.png';
 	import { getStage, formatDate } from '$lib/filmStages.js';
 
@@ -15,14 +18,25 @@
 		image = '',
 		stage = '',
 		deadline = null,
+		application = '',
 		href = '',
 		size = 'large',
 		class: className = ''
 	} = $props();
 
+	const applicationLabels = {
+		pending: { label: 'Pending', color: 'text-[#a9b0ab]' },
+		accepted: { label: 'Accepted', color: 'text-[#7be0a5]' },
+		declined: { label: 'Declined', color: 'text-red-300' }
+	};
+
 	let isLarge = $derived(size === 'large');
 	let stageInfo = $derived(getStage(stage));
 	let isCasting = $derived(stage === 'casting');
+	let applicationInfo = $derived(applicationLabels[application] ?? null);
+
+	let userRole = $derived(page.data?.user?.role ?? '');
+	let canapply = $derived(userRole == 'actor');
 
 	// remembers a poster that failed to load -> the placeholder is shown instead
 	let failedImage = $state(null);
@@ -76,7 +90,15 @@
 			<span class="whitespace-nowrap text-[#a9b0ab]">
 				{#if deadline}Until {formatDate(deadline, false)}{:else}Open now{/if}
 			</span>
-			<span class="font-semibold text-[#35c9b8]">Apply</span>
+			{#if canapply}
+				{#if applicationInfo}
+					<span class="text-right font-semibold text-[#35c9b8]">
+						Already applied <span class={applicationInfo.color}>({applicationInfo.label})</span>
+					</span>
+				{:else}
+					<span class="font-semibold text-[#35c9b8]">Apply</span>
+				{/if}
+			{/if}
 		</div>
 	{/if}
 </svelte:element>

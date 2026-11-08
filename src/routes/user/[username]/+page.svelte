@@ -103,6 +103,13 @@
 				{#if form?.photoError}
 					<p role="alert" class="mt-2 text-[13px] text-[#e05a5a]">{form.photoError}</p>
 				{/if}
+
+				<a
+					href="/user/{data.profile.username}/edit"
+					class="mt-3 block w-full rounded-lg border border-[#2e332f] px-4 py-2 text-center text-[14px] transition-colors hover:border-[#35c9b8]"
+				>
+					Edit profile
+				</a>
 			{/if}
 		</div>
 

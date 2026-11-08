@@ -95,6 +95,7 @@ export const actions = {
       maxAge: 60 * 60 * 24 * 7
     });
 
-    redirect(303, '/');
+    // actors fill in their profile first, everybody else goes to the home page
+    redirect(303, role === 'actor' ? `/user/${username}/edit` : '/');
   }
 };

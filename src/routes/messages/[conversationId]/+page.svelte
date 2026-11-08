@@ -23,6 +23,16 @@
 		accepted: 'border-teal-400 bg-teal-400/15 text-teal-300',
 		declined: 'border-red-400/60 bg-red-400/10 text-red-300'
 	};
+
+	// The newest message is at the bottom of the box. Scroll down when the page
+	// opens and every time the number of messages changes (e.g. after sending).
+	let chatBox = $state();
+	$effect(() => {
+		const count = data.messages.length;
+		if (chatBox && count > 0) {
+			chatBox.scrollTop = chatBox.scrollHeight;
+		}
+	});
 </script>
 
 <!-- Accept / Decline buttons: only the recipient sees them, only while pending -->
@@ -61,7 +71,10 @@
 	<a href="/messages" class="text-[14px] text-[#35c9b8] hover:underline">← Back to inbox</a>
 	<h1 class="mt-3 text-[26px]">{data.conversation.other_name}</h1>
 
-	<div class="mt-5 flex-1 overflow-y-auto rounded-[15px] border border-[#2a302d] bg-[#1b201d] p-5">
+	<div
+		bind:this={chatBox}
+		class="mt-5 flex-1 overflow-y-auto rounded-[15px] border border-[#2a302d] bg-[#1b201d] p-5"
+	>
 		{#if data.messages.length === 0}
 			<p class="text-[#8a8f8c]">No messages yet. Say hello!</p>
 		{:else}
