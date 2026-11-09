@@ -20,6 +20,7 @@
     <h1 class="text-[32px] md:text-[42px]">Films</h1>
     <div class="mt-3 h-1 w-24 rounded-full bg-[#35c9b8]"></div>
 
+
     {#if sections.length === 0}
         <p class="mt-10 text-[#8a8f8c]">No films yet.</p>
     {:else}
@@ -49,6 +50,7 @@
                             image={film.poster_url}
                             stage={film.stage}
                             deadline={film.casting_deadline}
+                            application={data.applications?.[film.id]}
                             href="/films/{film.id}"
                         />
                     {/each}

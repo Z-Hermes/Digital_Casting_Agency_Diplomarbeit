@@ -28,7 +28,18 @@
 </svelte:head>
 
 <div class="mx-auto max-w-[1000px] px-5 py-10 text-[#f2f2f0] md:px-10">
-    <a href="/films" class="text-[14px] text-[#35c9b8] hover:underline">← Back to films</a>
+    <div class="flex items-center justify-between gap-4">
+        <a href="/films" class="text-[14px] text-[#35c9b8] hover:underline">← Back to films</a>
+
+        {#if data.user && (data.user.role === 'admin' || data.film.producer_id === data.user.id)}
+            <a
+                href="/films/{data.film.id}/edit"
+                class="rounded-lg border border-white/20 px-4 py-2 text-[14px] text-[#e4e6e4] transition hover:border-teal-400 hover:text-teal-300"
+            >
+                Edit film
+            </a>
+        {/if}
+    </div>
 
     <div class="mt-6 flex flex-col gap-8 md:flex-row">
         <!-- poster (2:3), or the film frame when there is no poster yet -->
