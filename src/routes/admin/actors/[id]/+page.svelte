@@ -23,8 +23,7 @@
 	<a href="/admin/actors" class="text-[14px] text-[#35c9b8] hover:underline">← Back to all actors</a>
 
 	<div class="mt-6 flex items-center gap-4">
-		<Avatar src={data.actor.avatar_url} alt={data.actor.name} class="h-16 w-16 shrink-0" />
-		<div>
+		<Avatar src={data.avatarUrl} alt={data.actor.name} class="h-16 w-16 shrink-0" />		<div>
 			<h1 class="text-[28px] md:text-[36px]">Edit {data.actor.name}</h1>
 			<a href="/user/{data.actor.username}" class="text-[14px] text-[#8a8f8c] hover:text-[#35c9b8]">
 				View public profile
@@ -80,8 +79,7 @@
 		</form>
 	</div>
 
-	<form method="POST" class="mt-8 flex flex-col gap-8">
-		<!-- ===== Account ===== -->
+	<form method="POST" action="?/save" class="mt-8 flex flex-col gap-8">		<!-- ===== Account ===== -->
 		<fieldset class="rounded-[15px] border border-[#2e332f] bg-[#1b201d] p-5 md:p-6">
 			<legend class="px-2 text-[18px]">Account</legend>
 			<div class="grid gap-4 md:grid-cols-2">
