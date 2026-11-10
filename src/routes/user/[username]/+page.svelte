@@ -1,9 +1,14 @@
 <script>
 	import { enhance } from '$app/forms';
 	import Img from '$lib/components/Img.svelte';
+	import Lightbox from '$lib/components/Lightbox.svelte';
 	import { getStage, formatDate } from '$lib/filmStages.js';
 
 	let { data, form } = $props();
+
+	// gallery viewer: list of photo URLs + which one is open (null = closed)
+	let photoUrls = $derived(data.media.filter((m) => m.type === 'photo').map((m) => m.url));
+	let viewer = $state(null);
 
 	const statusLabels = {
 		available: 'Available',
@@ -271,7 +276,18 @@
 			<div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
 				{#each data.media as item}
 					{#if item.type === 'photo'}
-						<img src={item.url} alt="" class="aspect-square w-full rounded-[15px] object-cover" />
+												<button
+							type="button"
+							onclick={() => (viewer = photoUrls.indexOf(item.url))}
+							class="cursor-zoom-in overflow-hidden rounded-[15px]"
+							aria-label="Open photo"
+						>
+							<img
+								src={item.url}
+								alt=""
+								class="aspect-square w-full object-cover transition-transform duration-300 hover:scale-105"
+							/>
+						</button>
 					{:else}
 						<div class="flex aspect-square w-full items-center justify-center rounded-[15px] bg-[#1b201d] text-[#8a8f8c]">
 							Video
@@ -281,4 +297,6 @@
 			</div>
 		</div>
 	{/if}
+	
+	<Lightbox photos={photoUrls} bind:index={viewer} />
 </div>

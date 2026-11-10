@@ -6,8 +6,7 @@
 	// Use:  <PhotoManager name={actor.name} avatarUrl={data.avatarUrl} photos={data.photos} {form} />
 	import Avatar from './Avatar.svelte';
 
-	let { name = '', avatarUrl = null, photos = [], form = null, showAvatar = true } = $props();
-	// asks before deleting; "Cancel" stops the form
+	let { name = '', avatarUrl = null, photos = [], form = null, showAvatar = true } = $props();	// asks before deleting; "Cancel" stops the form
 	function confirmAction(message) {
 		return (event) => {
 			if (!confirm(message)) event.preventDefault();

@@ -14,11 +14,9 @@
 	</a>
 
 	<h1 class="mt-6 text-[28px] md:text-[36px]">My photos</h1>
-	<p class="mt-1 text-[15px] text-[#8a8f8c]">
-		Your profile picture is shown everywhere on the website. Gallery photos are shown on your profile.
+		<p class="mt-1 text-[15px] text-[#8a8f8c]">
+		These photos are shown on your profile. Change your profile picture directly on your profile.
 	</p>
-
 	<div class="mt-8">
-		<PhotoManager name={data.user.name} avatarUrl={data.avatarUrl} photos={data.photos} {form} />
-	</div>
+		<PhotoManager name={data.user.name} avatarUrl={data.avatarUrl} photos={data.photos} {form} showAvatar={false} />	</div>
 </div>
