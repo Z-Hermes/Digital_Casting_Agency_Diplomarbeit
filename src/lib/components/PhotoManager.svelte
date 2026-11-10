@@ -6,8 +6,7 @@
 	// Use:  <PhotoManager name={actor.name} avatarUrl={data.avatarUrl} photos={data.photos} {form} />
 	import Avatar from './Avatar.svelte';
 
-	let { name = '', avatarUrl = null, photos = [], form = null } = $props();
-
+	let { name = '', avatarUrl = null, photos = [], form = null, showAvatar = true } = $props();
 	// asks before deleting; "Cancel" stops the form
 	function confirmAction(message) {
 		return (event) => {
@@ -32,6 +31,7 @@
 		</p>
 	{/if}
 
+	{#if showAvatar}
 	<!-- ===== Profile picture ===== -->
 	<div class="rounded-[15px] border border-[#2e332f] bg-[#1b201d] p-5 md:p-6">
 		<h2 class="text-[18px]">Profile picture</h2>
@@ -59,6 +59,7 @@
 			</div>
 		</div>
 	</div>
+	{/if}
 
 	<!-- ===== Gallery ===== -->
 	<div class="rounded-[15px] border border-[#2e332f] bg-[#1b201d] p-5 md:p-6">
