@@ -173,10 +173,3 @@ export const actions = {
     redirect(303, `/messages/${conversationId}`);
   }
 };
-
-export const actions = {
-  avatar: async (event) => {
-    const userId = requireOwner(event);
-    return uploadAvatar(userId, await event.request.formData());
-  }
-};
