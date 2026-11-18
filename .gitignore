@@ -24,3 +24,6 @@ vite.config.ts.timestamp-*
 
 # uploaded pictures (not in git)
 /uploads
+# Paraglide
+src/lib/paraglide
+project.inlang/cache/

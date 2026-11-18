@@ -1,0 +1,7 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"home_welcome": "Willkommen bei",
+	"home_tagline": "Die Plattform, auf der Schauspieler ihr Talent zeigen und Casting-Profis die perfekte Besetzung für ihre nächste Produktion finden.",
+	"home_featured_actors": "Ausgewählte Schauspieler",
+	"home_no_actors": "Noch keine Schauspieler."
+}
