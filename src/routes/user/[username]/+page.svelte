@@ -35,7 +35,8 @@
 		credits: 'Credits',
 		films: 'Films',
 		jobs: 'Open casting calls',
-		photos: 'Photos'
+		photos: 'Photos',
+		videos: 'Videos'
 	};
 
 	const sectionTypeLabels = { text: 'Text', list: 'List', gallery: 'Gallery' };
@@ -127,6 +128,7 @@
 		if (key === 'films') return isFilmmaker;
 		if (key === 'jobs') return data.jobs.length > 0;
 		if (key === 'photos') return data.media.length > 0;
+		if (key === 'videos') return data.videos.length > 0;
 		return key in sectionsByKey;
 	}
 
@@ -165,7 +167,6 @@
 	const iconButton =
 		'cursor-pointer rounded-md border border-[#2e332f] px-2.5 py-1 text-[13px] hover:border-[#35c9b8] disabled:cursor-default disabled:opacity-30';
 </script>
-
 
 <svelte:head>
 	<title>{data.profile.name} | HD Studios</title>
@@ -325,7 +326,6 @@
 		</div>
 	</div>
 
-	
 	<!-- ===================== EDIT MODE TOOLBAR ===================== -->
 	{#if editing}
 		<div class="mt-10 rounded-[15px] border border-dashed border-[#35c9b8]/60 bg-[#0f2523] p-4 md:p-5">
@@ -534,24 +534,18 @@
 					<div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
 						{#each data.media as item (item.id)}
 							<div class="relative">
-								{#if item.type === 'photo'}
-									<button
-										type="button"
-										onclick={() => openPhotos(legacyPhotoUrls, legacyPhotoUrls.indexOf(item.url))}
-										class="block w-full cursor-zoom-in overflow-hidden rounded-[15px]"
-										aria-label="Open photo"
-									>
-										<img
-											src={item.url}
-											alt=""
-											class="aspect-square w-full object-cover transition-transform duration-300 hover:scale-105"
-										/>
-									</button>
-								{:else}
-									<div class="flex aspect-square w-full items-center justify-center rounded-[15px] bg-[#1b201d] text-[#8a8f8c]">
-										Video
-									</div>
-								{/if}
+								<button
+									type="button"
+									onclick={() => openPhotos(legacyPhotoUrls, legacyPhotoUrls.indexOf(item.url))}
+									class="block w-full cursor-zoom-in overflow-hidden rounded-[15px]"
+									aria-label="Open photo"
+								>
+									<img
+										src={item.url}
+										alt=""
+										class="aspect-square w-full object-cover transition-transform duration-300 hover:scale-105"
+									/>
+								</button>
 
 								{#if editing}
 									<form
@@ -572,12 +566,51 @@
 							</div>
 						{/each}
 					</div>
+
+				<!-- ----- self-tape videos (from /my-videos) ----- -->
+				{:else if key === 'videos'}
+					<h2 class="text-[26px]">Videos</h2>
+					<div class="mt-4 grid gap-4 sm:grid-cols-2">
+						{#each data.videos as video (video.id)}
+							<div class="relative">
+								<!-- svelte-ignore a11y_media_has_caption -->
+								<video
+									src={video.url}
+									controls
+									preload="metadata"
+									playsinline
+									class="aspect-video w-full rounded-[15px] border border-[#2e332f] bg-black"
+								></video>
+
+								{#if editing}
+									<form
+										method="POST"
+										action="?/deletePhoto"
+										use:enhance
+										class="absolute top-2 right-2"
+										onsubmit={(event) => {
+											if (!confirm('Delete this video?')) event.preventDefault();
+										}}
+									>
+										<input type="hidden" name="photoId" value={video.id} />
+										<button aria-label="Delete video" class="cursor-pointer rounded-full bg-black/70 px-2.5 py-1 text-[13px] text-white hover:bg-[#e05a5a]">
+											✕
+										</button>
+									</form>
+								{/if}
+							</div>
+						{/each}
+					</div>
+					{#if editing}
+						<p class="mt-3 text-[13px] text-[#8a8f8c]">
+							Upload new videos on <a href="/my-videos" class="text-[#35c9b8] hover:underline">My videos</a>.
+						</p>
+					{/if}
 				{/if}
 			</section>
 		{/if}
 	{/each}
 
-	
 	<!-- ===================== ADD SECTION (edit mode) ===================== -->
 	{#if editing}
 		<form

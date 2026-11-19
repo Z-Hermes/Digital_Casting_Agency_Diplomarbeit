@@ -18,7 +18,7 @@ const MAX_PHOTOS_PER_SECTION = 30;
 
 // built-in blocks every profile of this role can have (in default order)
 export function builtinBlocks(role) {
-	if (role === 'actor') return ['attributes', 'credits', 'photos'];
+	if (role === 'actor') return ['attributes', 'credits', 'photos', 'videos'];
 	if (role === 'director' || role === 'producer') return ['films', 'jobs', 'photos'];
 	return ['photos'];
 }
