@@ -3,6 +3,7 @@
 	// user = the logged-in user, or null when nobody is logged in
 	import logo from '$lib/assets/logo.png';
 	import Avatar from './Avatar.svelte';
+	import LanguageSwitcher from './LanguageSwitcher.svelte';
 
 	let { user } = $props();
 
@@ -41,6 +42,7 @@
 				<a href="/films" onclick={close} class="hover:text-[#35c9b8]">Films</a>
 				<a href="/foryoupage" onclick={close} class="hover:text-[#35c9b8]">For You Page</a>
 
+				<LanguageSwitcher />
                 
 				<!-- only admins see this link -->
 				{#if user?.role === 'admin'}

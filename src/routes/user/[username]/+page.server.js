@@ -1,13 +1,23 @@
-import { error, redirect } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
 import { db } from '$lib/server/database.js';
-import { uploadAvatar } from '$lib/server/photos.js';
+import { uploadAvatar, deletePhoto } from '$lib/server/photos.js';
+import { getConversation } from '$lib/server/inbox.js';
+import {
+  loadSections,
+  buildLayout,
+  addSection,
+  updateSection,
+  deleteSection,
+  uploadSectionPhotos,
+  saveLayout
+} from '$lib/server/sections.js';
 
 export async function load({ params, locals }) {
   const [userRows] = await db.execute(
     `SELECT u.id, u.username, u.name, u.role, u.avatar_url, u.blocked, u.created_at,
             ap.birth_date, ap.gender, ap.height_cm, ap.weight_kg,
             ap.eye_color, ap.hair_color, ap.city, ap.education,
-            ap.awards, ap.bio, ap.cv_url, ap.availability
+            ap.awards, ap.bio, ap.cv_url, ap.availability, u.profile_layout
      FROM users u
      LEFT JOIN actor_profiles ap ON ap.user_id = u.id
      WHERE u.username = ?`,
@@ -66,13 +76,18 @@ export async function load({ params, locals }) {
     );
   }
 
+    // photos without a section (uploaded before sections existed, or on /my-photos)
   const [media] = await db.execute(
     `SELECT id, type, url, size
      FROM media
-     WHERE user_id = ?
+     WHERE user_id = ? AND section_id IS NULL
      ORDER BY sort_order ASC`,
     [profile.id]
   );
+
+  // the user's own sections + the order of all blocks
+  const sections = await loadSections(profile.id);
+  const layout = buildLayout(profile.profile_layout, profile.role, sections);
 
   return {
     profile,
@@ -81,19 +96,21 @@ export async function load({ params, locals }) {
     credits,
     films,
     jobs,
-    media
+    media,
+    sections,
+    layout
   };
 }
 
-// The profile picture may only be changed by the owner of the profile (any role).
+// Only the owner may change the profile (picture, sections, order).
 // The id comes from the login, never from the form, so nobody can change
-// the photos of somebody else.
+// the profile of somebody else.
 function requireOwner({ locals, params }) {
   if (!locals.user) {
     redirect(303, '/login');
   }
   if (locals.user.username.toLowerCase() !== params.username.toLowerCase()) {
-    error(403, 'You can only change your own profile picture.');
+    error(403, 'You can only change your own profile.');
   }
   return locals.user.id;
 }
@@ -102,5 +119,57 @@ export const actions = {
   avatar: async (event) => {
     const userId = requireOwner(event);
     return uploadAvatar(userId, await event.request.formData());
+  },
+
+  // ---- sections (logic in src/lib/server/sections.js) ----
+  addSection: async (event) => {
+    const userId = requireOwner(event);
+    return addSection(userId, await event.request.formData());
+  },
+
+  updateSection: async (event) => {
+    const userId = requireOwner(event);
+    return updateSection(userId, await event.request.formData());
+  },
+
+  deleteSection: async (event) => {
+    const userId = requireOwner(event);
+    return deleteSection(userId, await event.request.formData());
+  },
+
+  sectionPhotos: async (event) => {
+    const userId = requireOwner(event);
+    return uploadSectionPhotos(userId, await event.request.formData());
+  },
+
+  deletePhoto: async (event) => {
+    const userId = requireOwner(event);
+    return deletePhoto(userId, await event.request.formData());
+  },
+
+  saveLayout: async (event) => {
+    const userId = requireOwner(event);
+    return saveLayout(userId, event.locals.user.role, await event.request.formData());
+  },
+
+  // "Send message": opens (or creates) the chat with this person
+  message: async ({ locals, params }) => {
+    if (!locals.user) {
+      redirect(303, '/login');
+    }
+
+    const [rows] = await db.execute('SELECT id FROM users WHERE username = ? AND blocked = 0', [
+      params.username
+    ]);
+    const other = rows[0];
+    if (!other) {
+      error(404, 'Profile not found');
+    }
+    if (other.id === locals.user.id) {
+      return fail(400, { error: 'You cannot send a message to yourself.' });
+    }
+
+    const conversationId = await getConversation(locals.user.id, other.id);
+    redirect(303, `/messages/${conversationId}`);
   }
 };

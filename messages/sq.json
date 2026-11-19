@@ -1,0 +1,7 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"home_welcome": "mirë se vini në",
+	"home_tagline": "Platforma ku aktorët shfaqin talentin e tyre dhe profesionistët e kastingut gjejnë kastin e përsosur për produksionin e tyre të ardhshëm.",
+	"home_featured_actors": "Aktorët në fokus",
+	"home_no_actors": "Ende nuk ka aktorë."
+}
