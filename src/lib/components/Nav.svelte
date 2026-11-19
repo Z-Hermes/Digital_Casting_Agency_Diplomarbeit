@@ -39,6 +39,7 @@
 				<a href="/actors" onclick={close} class="hover:text-[#35c9b8]">Actors</a>
 				<a href="/news" onclick={close} class="hover:text-[#35c9b8]">News</a>
 				<a href="/films" onclick={close} class="hover:text-[#35c9b8]">Films</a>
+				<a href="/foryoupage" onclick={close} class="hover:text-[#35c9b8]">For You Page</a>
 
                 
 				<!-- only admins see this link -->
