@@ -1,5 +1,7 @@
 <script>
 	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
+	import { onMount } from 'svelte';
 
 	let { data, form } = $props();
 
@@ -33,6 +35,22 @@
 			chatBox.scrollTop = chatBox.scrollHeight;
 		}
 	});
+
+	
+	// Neue Nachrichten automatisch laden: alle 3 Sekunden fragt die Seite den Server,
+	// ob neue Nachrichten da sind (ohne die Seite neu zu laden).
+	onMount(() => {
+		const timer = setInterval(() => {
+			// nur wenn der Tab sichtbar ist, sonst unnötige Anfragen
+			if (document.visibilityState === 'visible') {
+				invalidateAll();
+			}
+		}, 3000);
+
+		// beim Verlassen der Seite den Timer stoppen
+		return () => clearInterval(timer);
+	});
+
 </script>
 
 <!-- Accept / Decline buttons: only the recipient sees them, only while pending -->
