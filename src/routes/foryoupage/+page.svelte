@@ -26,7 +26,7 @@
           <!-- Like Button -->
           <button class="flex flex-col items-center gap-1 group cursor-pointer">
             <div class="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-xl transition group-hover:bg-black/60">
-              ❤️
+              <i class="fa-solid fa-heart"></i>
             </div>
             <span class="text-xs text-white font-medium drop-shadow">{post.likes}</span>
           </button>
@@ -34,7 +34,7 @@
           <!-- Kommentar Button -->
           <button class="flex flex-col items-center gap-1 group cursor-pointer">
             <div class="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-xl transition group-hover:bg-black/60">
-              💬
+              <i class="fa-solid fa-comment"></i>
             </div>
             <span class="text-xs text-white font-medium drop-shadow">{post.comments}</span>
           </button>
