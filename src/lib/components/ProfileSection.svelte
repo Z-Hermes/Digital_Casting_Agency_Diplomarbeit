@@ -4,6 +4,7 @@
 	// editing = true  -> the owner can change the title/content, add or delete photos
 	// The page needs the form actions: updateSection, sectionPhotos, deletePhoto
 	// Use:  <ProfileSection {section} {editing} onopen={(photos, index) => ...} />
+	import { m } from '$lib/paraglide/messages.js';
 	import { enhance } from '$app/forms';
 
 	let { section, editing = false, onopen = () => {} } = $props();
@@ -26,25 +27,25 @@
 	<!-- ===== edit: title + text / list items ===== -->
 	<form method="POST" action="?/updateSection" use:enhance={keepValues} class="flex flex-col gap-3">
 		<input type="hidden" name="sectionId" value={section.id} />
-		<input name="title" value={section.title} required maxlength="80" aria-label="Section title" class="{field} text-[18px]" />
+		<input name="title" value={section.title} required maxlength="80" aria-label={m.section_title_label()} class="{field} text-[18px]" />
 		<textarea
 			name="body"
 			rows={section.type === 'list' ? 5 : 4}
 			maxlength="5000"
-			aria-label={section.type === 'list' ? 'List items' : 'Text'}
-			placeholder={section.type === 'list' ? 'One item per line' : 'Write something…'}
+			aria-label={section.type === 'list' ? m.section_list_items() : m.section_type_text()}
+			placeholder={section.type === 'list' ? m.section_list_ph() : m.section_text_ph()}
 			class={field}>{section.body ?? ''}</textarea
 		>
 		<button class="{smallButton} self-start bg-[#35c9b8] font-medium text-[#101413] hover:bg-[#5fd8ca]">
-			Save section
+			{m.section_save()}
 		</button>
 	</form>
 {:else if editing}
 	<!-- ===== edit: gallery title ===== -->
 	<form method="POST" action="?/updateSection" use:enhance={keepValues} class="flex flex-col gap-3 sm:flex-row">
 		<input type="hidden" name="sectionId" value={section.id} />
-		<input name="title" value={section.title} required maxlength="80" aria-label="Section title" class="{field} text-[18px]" />
-		<button class="{smallButton} shrink-0 border border-[#2e332f] hover:border-[#35c9b8]">Rename</button>
+		<input name="title" value={section.title} required maxlength="80" aria-label={m.section_title_label()} class="{field} text-[18px]" />
+		<button class="{smallButton} shrink-0 border border-[#2e332f] hover:border-[#35c9b8]">{m.section_rename()}</button>
 	</form>
 {:else}
 	<h2 class="text-[26px]">{section.title}</h2>
@@ -63,7 +64,7 @@
 		{/each}
 	</ul>
 {:else if !editing && section.type !== 'gallery'}
-	<p class="mt-3 text-[#8a8f8c]">Nothing here yet.</p>
+	<p class="mt-3 text-[#8a8f8c]">{m.section_empty()}</p>
 {/if}
 
 <!-- ===== gallery (visitors and owner) ===== -->
@@ -76,7 +77,7 @@
 						type="button"
 						onclick={() => onopen(photoUrls, index)}
 						class="block w-full cursor-zoom-in overflow-hidden rounded-[15px]"
-						aria-label="Open photo"
+						aria-label="{m.common_open_photo()}"
 					>
 						<img
 							src={photo.url}
@@ -92,12 +93,12 @@
 							use:enhance
 							class="absolute top-2 right-2"
 							onsubmit={(event) => {
-								if (!confirm('Delete this photo?')) event.preventDefault();
+								if (!confirm({m.common_confirm_delete_photo()})) event.preventDefault();
 							}}
 						>
 							<input type="hidden" name="photoId" value={photo.id} />
 							<button
-								aria-label="Delete photo"
+								aria-label="{m.common_delete_photo()}"
 								class="cursor-pointer rounded-full bg-black/70 px-2.5 py-1 text-[13px] text-white hover:bg-[#e05a5a]"
 							>
 								✕
@@ -108,7 +109,7 @@
 			{/each}
 		</div>
 	{:else if !editing}
-		<p class="mt-3 text-[#8a8f8c]">No photos yet.</p>
+		<p class="mt-3 text-[#8a8f8c]">{m.common_no_photos()}</p>
 	{/if}
 
 	{#if editing}
@@ -122,9 +123,9 @@
 			<input type="hidden" name="sectionId" value={section.id} />
 			<input type="file" name="photos" multiple required accept="image/jpeg,image/png,image/webp" class={fileInput} />
 			<button class="{smallButton} shrink-0 bg-[#35c9b8] font-medium text-[#101413] hover:bg-[#5fd8ca]">
-				Add photos
+				{m.common_add_photos()}
 			</button>
 		</form>
-		<p class="mt-2 text-[13px] text-[#8a8f8c]">JPG, PNG or WebP, max. 5 MB each, up to 30 photos.</p>
+		<p class="mt-2 text-[13px] text-[#8a8f8c]">{m.section_photo_hint()}</p>
 	{/if}
 {/if}

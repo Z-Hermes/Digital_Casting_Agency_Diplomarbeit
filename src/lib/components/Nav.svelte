@@ -4,6 +4,7 @@
 	import logo from '$lib/assets/logo.png';
 	import Avatar from './Avatar.svelte';
 	import LanguageSwitcher from './LanguageSwitcher.svelte';
+	import { m } from '$lib/paraglide/messages.js';
 
 	let { user } = $props();
 
@@ -23,7 +24,7 @@
 		<a href="/" class="flex items-center gap-4 text-[22px] lg:gap-5 lg:text-[30px]" onclick={close}>
 			<img
 				src={logo}
-				alt="HD Studios logo"
+				alt={m.nav_logo_alt()}
 				class="block h-[62px] w-[62px] rounded-l-[15px] lg:h-[73px] lg:w-[73px]"
 			/>
 			<span>HD Studios</span>
@@ -35,18 +36,17 @@
 				class="{menuOpen ? 'flex' : 'hidden'} absolute top-full right-0 z-10 mt-2 w-48 flex-col items-center gap-4 rounded-[15px] bg-[#1a1a18] p-4 text-[17px]
 				md:static md:mt-0 md:flex md:w-auto md:flex-row md:gap-5 md:bg-transparent md:p-0 md:text-[15px] lg:gap-7 lg:text-[20px]"
 			>
-				<a href="/" onclick={close} class="hover:text-[#35c9b8]">Home</a>
-				<a href="/messages" onclick={close} class="hover:text-[#35c9b8]">Inbox</a>
-				<a href="/actors" onclick={close} class="hover:text-[#35c9b8]">Actors</a>
-				<a href="/news" onclick={close} class="hover:text-[#35c9b8]">News</a>
-				<a href="/films" onclick={close} class="hover:text-[#35c9b8]">Films</a>
-				<a href="/foryoupage" onclick={close} class="hover:text-[#35c9b8]">For You Page</a>
-
+				<a href="/" onclick={close} class="hover:text-[#35c9b8]">{m.nav_home()}</a>
+				<a href="/messages" onclick={close} class="hover:text-[#35c9b8]">{m.nav_inbox()}</a>
+				<a href="/actors" onclick={close} class="hover:text-[#35c9b8]">{m.nav_actors()}</a>
+				<a href="/news" onclick={close} class="hover:text-[#35c9b8]">{m.nav_news()}</a>
+				<a href="/films" onclick={close} class="hover:text-[#35c9b8]">{m.nav_films()}</a>
+				<a href="/foryoupage" onclick={close} class="hover:text-[#35c9b8]">{m.nav_fyp()}</a>
 				<LanguageSwitcher />
                 
 				<!-- only admins see this link -->
 				{#if user?.role === 'admin'}
-					<a href="/admin/actors" onclick={close} class="text-[#35c9b8] hover:underline">Admin</a>
+					<a href="/admin/actors" onclick={close} class="text-[#35c9b8] hover:underline">{m.nav_admin()}</a>
 				{/if}
 
 				{#if user}
@@ -55,7 +55,7 @@
 							type="submit"
 							class="cursor-pointer rounded-full bg-[#084a43] px-5 py-1.5 text-[#8fcfc4] hover:text-[#35c9b8] md:px-4 md:py-1 lg:px-5 lg:py-1.5"
 						>
-							log out
+							{m.nav_logout()}
 						</button>
 					</form>
 				{:else}
@@ -64,7 +64,7 @@
 						onclick={close}
 						class="rounded-full bg-[#084a43] px-5 py-1.5 text-[#8fcfc4] hover:text-[#35c9b8] md:px-4 md:py-1 lg:px-5 lg:py-1.5"
 					>
-						log in
+						{m.nav_login()}
 					</a>
 				{/if}
 			</nav>
@@ -73,7 +73,7 @@
 			<a href={user ? `/user/${user.username}` : '/login'} onclick={close}>
 				<Avatar
 					src={user?.avatar_url}
-					alt={user ? user.name : 'Log in'}
+					alt={user ? user.name : m.common_login()}
 					class="h-10 w-10 md:h-11 md:w-11 lg:h-14 lg:w-14"
 				/>
 			</a>
@@ -81,7 +81,7 @@
 			<!-- menu button: only visible on phone -->
 			<button
 				class="cursor-pointer text-[28px] leading-none md:hidden"
-				aria-label="Open menu"
+				aria-label={m.nav_open_menu()}
 				onclick={() => (menuOpen = !menuOpen)}
 			>
 				☰

@@ -3,8 +3,9 @@
 	// the default-pfp is shown instead.
 	// Use:  <Avatar src={user.photo} alt="Brad Pitt" class="h-14 w-14" />
 	import defaultPfp from '$lib/assets/default-pfp.png';
+	import { m } from '$lib/paraglide/messages.js';
 
-	let { src = '', alt = 'Profile picture', class: className = 'h-14 w-14' } = $props();
+	let { src = '', alt = 'm.common_profile_picture()', class: className = 'h-14 w-14' } = $props();
 </script>
 
 <img

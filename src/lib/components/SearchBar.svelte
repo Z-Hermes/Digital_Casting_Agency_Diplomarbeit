@@ -2,7 +2,8 @@
 	// Search field from the Database mockup.
 	// Put it inside a <form method="GET">: pressing Enter sends ?search=... to the page.
 	// Use:  <form method="GET"><SearchBar value={data.search} /></form>
-	let { name = 'search', value = '', placeholder = 'Search', class: className = '' } = $props();
+	import { m } from '$lib/paraglide/messages.js';
+	let { name = 'search', value = '', placeholder = '{m.common_search()}', class: className = '' } = $props();
 </script>
 
 <div class="relative w-full md:max-w-[360px] {className}">
