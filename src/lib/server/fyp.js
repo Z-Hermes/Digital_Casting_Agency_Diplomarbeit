@@ -1,13 +1,12 @@
 import { fail } from '@sveltejs/kit';
 import { db } from './database.js';
-
-// The For You feed = every actor's self-tape from the media table.
-// One upload (on /my-videos or on the FYP) shows on the profile AND here.
+import { interestVector, ensureClusters, rankFeed } from './recommend.js';
 
 const MAX_COMMENT = 300;
 
+// The feed is now RANKED, not just newest-first.
 export async function loadFeed(viewerId = 0) {
-	const [posts] = await db.execute(
+	const [rows] = await db.execute(
 		`SELECT m.id, m.url, m.caption, m.created_at,
 		        u.id AS user_id, u.username, u.name, u.avatar_url, u.role,
 		        ap.city, ap.availability,
@@ -17,12 +16,32 @@ export async function loadFeed(viewerId = 0) {
 		 FROM media m
 		 JOIN users u ON u.id = m.user_id
 		 LEFT JOIN actor_profiles ap ON ap.user_id = u.id
-		 WHERE m.type = 'video' AND u.role = 'actor' AND u.blocked = 0
-		 ORDER BY m.id DESC
-		 LIMIT 50`,
+		 WHERE m.type = 'video' AND u.role = 'actor' AND u.blocked = 0`,
 		[viewerId]
 	);
-	return posts;
+	if (rows.length === 0) return { posts: [], mode: 'empty' };
+
+	const [vt] = await db.execute('SELECT media_id, tag_id FROM video_tags');
+	const tagMap = new Map();
+	for (const r of vt) {
+		if (!tagMap.has(r.media_id)) tagMap.set(r.media_id, []);
+		tagMap.get(r.media_id).push(r.tag_id);
+	}
+	const [tags] = await db.execute('SELECT id, name FROM tags');
+	const tagNames = new Map(tags.map((t) => [t.id, t.name]));
+
+	const userVec = await interestVector(viewerId);
+	const clusters = await ensureClusters();
+
+	const [lc] = await db.execute(
+		`SELECT vl.media_id, uc.cluster_id, COUNT(*) AS n
+		 FROM video_likes vl
+		 JOIN user_clusters uc ON uc.user_id = vl.user_id
+		 GROUP BY vl.media_id, uc.cluster_id`
+	);
+	const likesByCluster = new Map(lc.map((r) => [`${r.media_id}:${r.cluster_id}`, r.n]));
+
+	return rankFeed(rows, tagMap, tagNames, userVec, clusters, likesByCluster, viewerId);
 }
 
 export async function toggleLike(userId, mediaId) {
@@ -36,12 +55,21 @@ export async function toggleLike(userId, mediaId) {
 	let liked;
 	if (existing.length > 0) {
 		await db.execute('DELETE FROM video_likes WHERE media_id = ? AND user_id = ?', [mediaId, userId]);
+		await db.execute(
+			`DELETE FROM video_events WHERE user_id = ? AND media_id = ? AND event = 'like'
+			 ORDER BY id DESC LIMIT 1`,
+			[userId, mediaId]
+		);
 		liked = false;
 	} else {
 		try {
 			await db.execute('INSERT INTO video_likes (media_id, user_id) VALUES (?, ?)', [mediaId, userId]);
+			await db.execute(
+				`INSERT INTO video_events (user_id, media_id, event) VALUES (?, ?, 'like')`,
+				[userId, mediaId]
+			);
 		} catch {
-			// double-tap race: the primary key already has this like
+			// double-tap race
 		}
 		liked = true;
 	}
@@ -75,6 +103,10 @@ export async function addComment(userId, formData) {
 		'INSERT INTO video_comments (media_id, user_id, body) VALUES (?, ?, ?)',
 		[mediaId, userId, body]
 	);
+	await db.execute(`INSERT INTO video_events (user_id, media_id, event) VALUES (?, ?, 'comment')`, [
+		userId,
+		mediaId
+	]);
 	const [rows] = await db.execute(
 		`SELECT c.id, c.user_id, c.body, c.created_at, u.username, u.name, u.avatar_url, u.role
 		 FROM video_comments c JOIN users u ON u.id = c.user_id WHERE c.id = ?`,

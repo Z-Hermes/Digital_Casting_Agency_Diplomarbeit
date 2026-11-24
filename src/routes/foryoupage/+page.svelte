@@ -62,6 +62,33 @@
 	let toastTimer;
 	let expanded = $state({});
 
+		// ---- algorithm: tags + signal tracking ----
+	let selectedTags = $state([]);
+	let tagError = $state(null);
+	const viewed = new Set();
+	const watched = {};
+	let prevActive = null;
+
+	function sendTrack(payload) {
+		const body = JSON.stringify(payload);
+		if (navigator.sendBeacon) {
+			navigator.sendBeacon('/foryoupage/track', new Blob([body], { type: 'application/json' }));
+		} else {
+			fetch('/foryoupage/track', {
+				method: 'POST',
+				body,
+				headers: { 'Content-Type': 'application/json' },
+				keepalive: true
+			}).catch(() => {});
+		}
+	}
+
+	function flushWatch(id) {
+		if (data.user && id !== null && (watched[id] ?? 0) > 0.02) {
+			sendTrack({ videoId: id, event: 'watch', watch_pct: Math.min(1, watched[id]) });
+		}
+	}
+
 	function view(post) {
 		const o = overrides[post.id] ?? {};
 		return {
@@ -260,6 +287,8 @@
 		checking = false;
 		unchecked = false;
 		dragOver = false;
+		selectedTags = [];
+		tagError = null;
 		if (previewUrl) URL.revokeObjectURL(previewUrl);
 		previewUrl = null;
 		if (fileInput) fileInput.value = '';
@@ -346,11 +375,27 @@
 		return () => window.removeEventListener('keydown', onKey);
 	});
 
+		// log a view when a slide becomes active, and the watch-% when it is left
+	$effect(() => {
+		const id = activeId;
+		if (prevActive !== null && prevActive !== id) flushWatch(prevActive);
+		if (id !== null && data.user && !viewed.has(id)) {
+			viewed.add(id);
+			sendTrack({ videoId: id, event: 'view' });
+		}
+		prevActive = id;
+	});
+
 	onMount(() => {
 		if (location.hash.startsWith('#video-')) {
 			document.getElementById(location.hash.slice(1))?.scrollIntoView();
 		}
+		const onHide = () => flushWatch(prevActive);
+		window.addEventListener('pagehide', onHide);
+		document.addEventListener('visibilitychange', onHide);
 		return () => {
+			window.removeEventListener('pagehide', onHide);
+			document.removeEventListener('visibilitychange', onHide);
 			clearTimeout(toastTimer);
 			clearTimeout(burstTimer);
 			clearTimeout(flashTimer);
@@ -437,8 +482,12 @@
 							onloadeddata={() => (loaded[post.id] = true)}
 							onerror={() => (failed[post.id] = true)}
 							ontimeupdate={(e) => {
+								const el = e.currentTarget;
+								if (el.duration) {
+									const frac = el.currentTime / el.duration;
+									watched[post.id] = Math.max(watched[post.id] ?? 0, frac);
+								}
 								if (post.id === activeId && !seeking) {
-									const el = e.currentTarget;
 									playProgress = el.duration ? (el.currentTime / el.duration) * 100 : 0;
 								}
 							}}
@@ -508,7 +557,7 @@
 							<div>
 								<p class="text-[15px] font-semibold leading-none tracking-wide">For You</p>
 								<p class="mt-1 text-[11px] leading-none text-white/50">
-									{activeIndex + 1} / {data.posts.length} · self-tapes
+									{activeIndex + 1} / {data.posts.length} · {data.mode === 'personal' ? 'picked for you' : 'popular now'}
 								</p>
 							</div>
 						</div>
@@ -653,6 +702,7 @@
 								<span><i class="fa-solid fa-clapperboard"></i></span>
 								Self-tape{#if durations[post.id]} · {durationLabel(durations[post.id])}{/if}
 							</span>
+							
 							{#if post.city}
 								<span class="flex items-center gap-1.5 rounded-full bg-black/40 px-2 py-0.5 backdrop-blur-md">
 									<span><i class="fa-solid fa-location-dot"></i></span> {post.city}
@@ -896,16 +946,17 @@
 							Manage my videos
 						</a>
 					</div>
-				{:else}
+								{:else}
 					<form
 						method="POST"
 						action="?/upload"
 						enctype="multipart/form-data"
 						class="mt-4 flex flex-col gap-3"
 						use:enhance={({ cancel }) => {
-							if (checking || fileError || !fileInput?.files?.length) {
+							if (checking || fileError || !fileInput?.files?.length || selectedTags.length === 0) {
 								cancel();
 								if (!fileInput?.files?.length) fileError = 'Please choose a video.';
+								if (selectedTags.length === 0) tagError = 'Pick at least one tag.';
 								return;
 							}
 							uploading = true;
@@ -925,7 +976,7 @@
 							};
 						}}
 					>
-					<input
+						<input
 							bind:this={fileInput}
 							id="fyp-video-input"
 							type="file"
@@ -949,6 +1000,18 @@
 								onDrop(e);
 							}}
 						>
+							{#if previewUrl}
+								<!-- svelte-ignore a11y_media_has_caption -->
+								<video src={previewUrl} controls muted playsinline class="h-44 w-full bg-black object-contain"></video>
+								<p class="truncate px-3 py-2 text-center text-[12px] text-[#8a8f8c]">{fileName} · click to change</p>
+							{:else}
+								<div class="flex flex-col items-center gap-2 px-6 py-10 text-center">
+									<span class="text-3xl text-[#35c9b8]"><i class="fa-solid fa-video"></i></span>
+									<p class="text-[15px] font-medium">Drop a video here or click to browse</p>
+									<p class="text-[12px] text-[#8a8f8c]">MP4 or MOV · max. 60 seconds · max. 100 MB</p>
+								</div>
+							{/if}
+						</label>
 
 						{#if checking}
 							<p class="text-[13px] text-[#8a8f8c]">Checking video length…</p>
@@ -965,6 +1028,35 @@
 						{#if form?.videoError}
 							<p class="text-[13px] text-[#ff8a8a]" role="alert">{form.videoError}</p>
 						{/if}
+
+						<fieldset>
+							<legend class="text-[13px] text-[#8a8f8c]">
+								Tags — what is this tape? (pick 1–3)
+							</legend>
+							<div class="mt-2 flex flex-wrap gap-2">
+								{#each data.tags as tag (tag.id)}
+									<label
+										class="cursor-pointer rounded-full border px-3 py-1 text-[13px] transition {selectedTags.includes(tag.id)
+											? 'border-[#35c9b8] bg-[#0f2523] text-[#7ef0e0]'
+											: 'border-[#2e332f] bg-[#1b201d] text-[#a9b0ab] hover:border-[#35c9b8]'} {selectedTags.length >= 3 && !selectedTags.includes(tag.id) ? 'opacity-40' : ''}"
+									>
+										<input
+											type="checkbox"
+											name="tags"
+											value={tag.id}
+											class="sr-only"
+											bind:group={selectedTags}
+											disabled={selectedTags.length >= 3 && !selectedTags.includes(tag.id)}
+											onchange={() => (tagError = null)}
+										/>
+										{tag.name}
+									</label>
+								{/each}
+							</div>
+							{#if tagError}
+								<p class="mt-1.5 text-[13px] text-[#ff8a8a]" role="alert">{tagError}</p>
+							{/if}
+						</fieldset>
 
 						<div>
 							<textarea

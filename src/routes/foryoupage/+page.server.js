@@ -1,6 +1,6 @@
 import { error, redirect } from '@sveltejs/kit';
 import { loadFeed, toggleLike, addComment, deleteComment } from '$lib/server/fyp.js';
-import { uploadVideo, deleteVideo, countVideos, MAX_VIDEOS } from '$lib/server/videos.js';
+import { uploadVideo, deleteVideo, countVideos, loadTags, MAX_VIDEOS } from '$lib/server/videos.js';
 
 function requireLogin(locals) {
 	if (!locals.user) redirect(303, '/login');
@@ -14,13 +14,13 @@ function requireActor(locals) {
 }
 
 export async function load({ locals }) {
-	const posts = await loadFeed(locals.user?.id ?? 0);
+	const { posts, mode } = await loadFeed(locals.user?.id ?? 0);
 	const myVideos = locals.user?.role === 'actor' ? await countVideos(locals.user.id) : 0;
-	return { posts, myVideos, maxVideos: MAX_VIDEOS };
+	const tags = await loadTags();
+	return { posts, mode, tags, myVideos, maxVideos: MAX_VIDEOS };
 }
 
 export const actions = {
-	// same pipeline as /my-videos: 60 s, 100 MB, MP4/MOV, max 3 per actor
 	upload: async ({ request, locals }) => {
 		const user = requireActor(locals);
 		return uploadVideo(user.id, await request.formData());
