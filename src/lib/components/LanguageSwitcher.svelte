@@ -2,13 +2,14 @@
 	// Dropdown to change the website language (EN / DE / SQ / IT).
 	// The choice is saved in a cookie, then the page reloads in the new language.
 	import { locales, getLocale, setLocale } from '$lib/paraglide/runtime.js';
+		import { m } from '$lib/paraglide/messages.js';
 
 	const labels = { en: 'EN', de: 'DE', sq: 'SQ', it: 'IT' };
 
 	const current = getLocale();
 </script>
 
-<label for="language" class="sr-only">Language</label>
+<label for="language" class="sr-only">{m.nav_language()}</label>
 <select
 	id="language"
 	value={current}

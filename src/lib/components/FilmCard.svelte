@@ -7,6 +7,7 @@
 	//                        role={credit.role_name} image={credit.poster_url} />
 	// Without href the card is not clickable (credits are not always films on the platform).
 	// application: 'pending' | 'accepted' | 'declined' = the logged-in actor applied for this film.
+	import { m } from '$lib/paraglide/messages.js';
 	import { page } from '$app/state';
 	import filmRoll from '$lib/assets/film_roll_teal.png';
 	import { getStage, formatDate } from '$lib/filmStages.js';
@@ -26,9 +27,9 @@
 	} = $props();
 
 	const applicationLabels = {
-		pending: { label: 'Pending', color: 'text-[#a9b0ab]' },
-		accepted: { label: 'Accepted', color: 'text-[#7be0a5]' },
-		declined: { label: 'Declined', color: 'text-red-300' }
+				pending: { label: m.application_pending(), color: 'text-[#a9b0ab]' },
+		accepted: { label: m.application_accepted(), color: 'text-[#7be0a5]' },
+		declined: { label: m.application_declined(), color: 'text-red-300' }
 	};
 
 	let isLarge = $derived(size === 'large');
@@ -76,7 +77,7 @@
 				<p class="mt-1 text-[#a9b0ab] {isLarge ? 'text-[14px]' : 'text-[12px]'}">{year}</p>
 			{/if}
 			{#if role}
-				<p class="text-[#a9b0ab] {isLarge ? 'text-[14px]' : 'text-[12px]'}">as {role}</p>
+				<p class="text-[#a9b0ab] {isLarge ? 'text-[14px]' : 'text-[12px]'}">{m.common_as_role({ role })}</p>
 			{/if}
 		</div>
 	</div>
@@ -85,9 +86,8 @@
 	{#if isCasting}
 		<div class="flex items-center justify-between gap-2 px-4 py-3 text-[13px]">
 			<span class="whitespace-nowrap text-[#a9b0ab]">
-				{#if deadline}Until {formatDate(deadline, false)}{:else}Open now{/if}
-			</span>
-			<span class="font-semibold text-[#35c9b8]">Apply</span>
+				{#if deadline}{m.filmcard_until({ date: formatDate(deadline, false) })}{:else}{m.filmcard_open_now()}{/if}			</span>
+			<span class="font-semibold text-[#35c9b8]">{m.common_apply()}</span>
 		</div>
 	{/if}
 </svelte:element>

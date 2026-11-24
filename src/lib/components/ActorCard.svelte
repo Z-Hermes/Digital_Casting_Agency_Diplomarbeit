@@ -7,6 +7,7 @@
 	//              image={actor.avatar_url} href="/user/{actor.username}" />
 	import Img from './Img.svelte';
 	import StatusBadge from './StatusBadge.svelte';
+	import { m } from '$lib/paraglide/messages.js';
 
 	let {
 		name,
@@ -38,10 +39,10 @@
 	>
 		{#if isLanding}
 			<h3 class="text-[26px] md:text-[19px] lg:text-[26px]">{name}</h3>
-			{#if age}<p class="mt-0.5 text-[24px] md:text-[17px] lg:text-[24px]">{age} years old</p>{/if}
+			{#if age}<p class="mt-0.5 text-[24px] md:text-[17px] lg:text-[24px]">{m.actorcard_age({age})}</p>{/if}
 		{:else}
 			<h3 class="text-[18px]">{name}</h3>
-			{#if age}<p class="text-[18px]">{age} years old</p>{/if}
+			{#if age}<p class="text-[18px]">{m.actorcard_age({age})}</p>{/if}
 		{/if}
 
 		<div class="mt-3 flex items-center justify-between">
@@ -55,10 +56,10 @@
 				<a
 					{href}
 					class="text-[28px] leading-none font-bold text-[#35c9b8]"
-					aria-label="More about {name}">...</a
+					aria-label={m.actorcard_more_about({name})}>...</a
 				>
 			{:else}
-				<a {href} class="text-[13px] text-[#35c9b8] hover:underline">More</a>
+				<a {href} class="text-[13px] text-[#35c9b8] hover:underline">{m.actorcard_more()}</a>
 			{/if}
 		</div>
 	</div>

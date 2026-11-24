@@ -1,4 +1,6 @@
 <script>
+    import { m } from '$lib/paraglide/messages.js';
+
     let { form } = $props();
 
     let username = $state('');
@@ -6,7 +8,7 @@
 </script>
 
 <svelte:head>
-	<title>Login | HD Studios</title>
+	<title>{m.login_title()} | HD Studios</title>
 </svelte:head>
 
 <div
@@ -25,14 +27,13 @@
 			</p>
 
 			<h1 class="mt-6 text-4xl font-light tracking-tight sm:text-6xl lg:mt-12">
-				Welcome Back
+				{m.login_heading()}
 			</h1>
 
 			<div class="mt-6 h-1 w-24 rounded-full bg-teal-400"></div>
 
 			<p class="mt-8 max-w-lg text-lg leading-relaxed text-teal-100/70 sm:text-xl">
-				Sign in to your HD Studios account and continue
-				exploring opportunities in the Albanian film industry.
+				{m.login_text()}
 			</p>
 		</div>
 
@@ -54,7 +55,7 @@
 
 				<div class="text-center">
 					<h2 class="text-3xl font-light">
-						Login
+						{m.login_title()}
 					</h2>
 
 					<div class="mx-auto mt-3 h-1 w-24 rounded-full bg-teal-400"></div>
@@ -71,7 +72,7 @@
 						type="text"
 						bind:value={username}
 						required
-						placeholder="Username"
+						placeholder={m.login_username_ph()}
 						class="w-full rounded-lg border border-white/10 bg-[#162322] px-4 py-3 text-white outline-none transition placeholder:text-gray-400 focus:border-teal-400"
 					/>
 
@@ -80,7 +81,7 @@
 						type="password"
 						bind:value={password}
 						required
-						placeholder="Password"
+						placeholder={m.login_password_ph()}
 						class="w-full rounded-lg border border-white/10 bg-[#162322] px-4 py-3 text-white outline-none transition placeholder:text-gray-400 focus:border-teal-400"
 					/>
 
@@ -89,7 +90,7 @@
 							href="/reset-password"
 							class="text-sm text-teal-400 transition hover:text-teal-300"
 						>
-							Forgot password?
+							{m.login_forgot()}
 						</a>
 					</div>
 
@@ -97,16 +98,16 @@
 						type="submit"
 						class="mt-3 w-full rounded-lg bg-teal-400 py-3 font-medium text-white transition hover:bg-teal-300"
 					>
-						Login
+						{m.login_button()}
 					</button>
 
 					<p class="pt-4 text-center text-sm text-gray-400">
-						Don't have an account?
+						{m.login_no_account()}
 						<a
 							href="/register"
 							class="ml-2 text-teal-400 transition hover:text-teal-300"
 						>
-							Create Account
+							{m.login_create_account()}
 						</a>
 					</p>
 

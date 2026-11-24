@@ -2,11 +2,13 @@
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import { m } from '$lib/paraglide/messages.js';
+	import { getLocale } from '$lib/paraglide/runtime.js';
 
 	let { data, form } = $props();
 
 	function formatTime(dateStr) {
-		return new Date(dateStr).toLocaleString('en-GB', {
+		return new Date(dateStr).toLocaleString(getLocale(), {
 			day: 'numeric',
 			month: 'short',
 			hour: '2-digit',
@@ -15,9 +17,9 @@
 	}
 
 	const statusLabel = {
-		pending: 'Pending',
-		accepted: '✓ Accepted',
-		declined: '✗ Declined'
+		pending: m.application_pending(),
+		accepted: m.chat_accepted(),
+		declined: m.chat_declined()
 	};
 
 	const statusClass = {
@@ -63,7 +65,7 @@
 					type="submit"
 					class="rounded-lg bg-teal-400 px-4 py-2 text-[14px] font-medium text-[#032624] hover:bg-teal-300"
 				>
-					Accept
+					{m.chat_accept()}
 				</button>
 			</form>
 			<form method="POST" action="?/decline" use:enhance>
@@ -72,12 +74,12 @@
 					type="submit"
 					class="rounded-lg border border-white/20 px-4 py-2 text-[14px] text-[#e4e6e4] hover:border-red-400 hover:text-red-300"
 				>
-					Decline
+					{m.chat_decline()}
 				</button>
 			</form>
 		</div>
 	{:else if msg.status === 'pending' && msg.sender_id === data.currentUserId}
-		<p class="mt-3 text-[13px] text-[#8a8f8c]">Waiting for an answer…</p>
+		<p class="mt-3 text-[13px] text-[#8a8f8c]">{m.chat_waiting()}</p>
 	{/if}
 {/snippet}
 
@@ -86,7 +88,7 @@
 </svelte:head>
 
 <div class="mx-auto flex h-[calc(100vh-120px)] max-w-[800px] flex-col px-5 py-6 text-[#f2f2f0] md:px-10">
-	<a href="/messages" class="text-[14px] text-[#35c9b8] hover:underline">← Back to inbox</a>
+	<a href="/messages" class="text-[14px] text-[#35c9b8] hover:underline">{m.chat_back()}</a>
 	<h1 class="mt-3 text-[26px]">{data.conversation.other_name}</h1>
 
 	<div
@@ -94,7 +96,7 @@
 		class="mt-5 flex-1 overflow-y-auto rounded-[15px] border border-[#2a302d] bg-[#1b201d] p-5"
 	>
 		{#if data.messages.length === 0}
-			<p class="text-[#8a8f8c]">No messages yet. Say hello!</p>
+			<p class="text-[#8a8f8c]">{m.chat_empty()}</p>
 		{:else}
 			<div class="flex flex-col gap-3">
 				{#each data.messages as msg}
@@ -103,7 +105,7 @@
 							<!-- Application card: film, actor profile and the message -->
 							<div class="rounded-[15px] border border-teal-400/40 bg-[#162322] p-4">
 								<div class="flex items-center justify-between gap-3">
-									<p class="text-[12px] uppercase tracking-wide text-teal-300">Application</p>
+									<p class="text-[12px] uppercase tracking-wide text-teal-300">{m.chat_application()}</p>
 									{#if msg.status}
 										<span class="rounded-full border px-2 py-0.5 text-[11px] {statusClass[msg.status]}">
 											{statusLabel[msg.status]}
@@ -139,18 +141,18 @@
 									href="/user/{msg.sender_username}"
 									class="mt-4 inline-block rounded-lg bg-teal-400 px-4 py-2 text-[14px] font-medium text-[#032624] hover:bg-teal-300"
 								>
-									View actor profile
+									{m.chat_view_profile()}
 								</a>
 
 								{@render respondButtons(msg)}
 
 								{#if msg.status === 'accepted'}
 									<p class="mt-4 rounded-lg border border-teal-400/50 bg-teal-400/10 px-3 py-2 text-[14px] font-medium text-teal-300">
-										✓ Accepted
+										{m.chat_accepted()}
 									</p>
 								{:else if msg.status === 'declined'}
 									<p class="mt-4 rounded-lg border border-red-400/50 bg-red-400/10 px-3 py-2 text-[14px] font-medium text-red-300">
-										✗ Declined
+										{m.chat_declined()}
 									</p>
 								{/if}
 							</div>
@@ -171,7 +173,7 @@
 								{msg.body}
 							</div>
 							{#if msg.type === 'invitation' && msg.status}
-								<p class="mt-1 text-[12px] text-[#8a8f8c]">Invitation · {statusLabel[msg.status]}</p>
+								<p class="mt-1 text-[12px] text-[#8a8f8c]">{m.chat_invitation({ status: statusLabel[msg.status] })}</p>
 								{@render respondButtons(msg)}
 							{/if}
 						{/if}
@@ -191,14 +193,14 @@
 			name="body"
 			type="text"
 			required
-			placeholder="Type a message..."
+			placeholder={m.chat_input_ph()}
 			class="flex-1 rounded-lg border border-white/10 bg-[#162322] px-4 py-3 text-white outline-none placeholder:text-gray-400 focus:border-teal-400"
 		/>
 		<button
 			type="submit"
 			class="rounded-lg bg-teal-400 px-5 py-3 font-medium text-black transition hover:bg-teal-300"
 		>
-			Send
+			{m.common_send()}
 		</button>
 	</form>
 </div>

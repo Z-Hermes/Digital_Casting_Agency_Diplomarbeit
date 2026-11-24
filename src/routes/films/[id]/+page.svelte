@@ -3,10 +3,18 @@
     import Img from '$lib/components/Img.svelte';
     import { getStage, formatDate } from '$lib/filmStages.js';
     import { enhance } from '$app/forms';
+    import { m } from '$lib/paraglide/messages.js';
 
     let { data, form } = $props();
 
     let stage = $derived(getStage(data.film.stage));
+
+    // database value -> translated status text
+    const applicationLabels = {
+        pending: m.application_pending(),
+        accepted: m.application_accepted(),
+        declined: m.application_declined()
+    };
 
     // Steuert, ob das Bewerbungsformular/Modal offen ist
     let showApplyModal = $state(false);
@@ -29,14 +37,14 @@
 
 <div class="mx-auto max-w-[1000px] px-5 py-10 text-[#f2f2f0] md:px-10">
     <div class="flex items-center justify-between gap-4">
-        <a href="/films" class="text-[14px] text-[#35c9b8] hover:underline">← Back to films</a>
+        <a href="/films" class="text-[14px] text-[#35c9b8] hover:underline">{m.film_back()}</a>
 
         {#if data.user && (data.user.role === 'admin' || data.film.producer_id === data.user.id)}
             <a
                 href="/films/{data.film.id}/edit"
                 class="rounded-lg border border-white/20 px-4 py-2 text-[14px] text-[#e4e6e4] transition hover:border-teal-400 hover:text-teal-300"
             >
-                Edit film
+                {m.film_edit()}
             </a>
         {/if}
     </div>
@@ -71,25 +79,25 @@
             <!-- casting box: only for films that are looking for actors -->
             {#if data.film.stage === 'casting'}
                 <div class="mt-6 rounded-[15px] border border-[#35c9b8]/60 bg-[#0f2523] p-5">
-                    <p class="text-[18px]">This production is casting now</p>
+                    <p class="text-[18px]">{m.film_casting_now()}</p>
                     <p class="mt-1 text-[14px] text-[#a9b0ab]">
                         {#if data.film.casting_deadline}
-                            Applications close on {formatDate(data.film.casting_deadline)}.
+                            {m.film_deadline_text({ date: formatDate(data.film.casting_deadline) })}
                         {:else}
-                            Applications are open.
+                            {m.film_applications_open()}
                         {/if}
                     </p>
 
                     {#if data.application}
                         <p class="mt-4 text-[14px] text-[#35c9b8] font-medium">
-                            ✓ You have applied for this production (Status: {data.application.status})
+                            {m.film_applied({ status: applicationLabels[data.application.status] ?? data.application.status })}
                         </p>
                         {#if form?.conversationId}
                             <a
                                 href="/messages/{form.conversationId}"
                                 class="mt-2 inline-block text-[14px] text-[#35c9b8] underline hover:text-[#5fd8ca]"
                             >
-                                Open conversation with the producer
+                                {m.film_open_conversation()}
                             </a>
                         {/if}
                     {:else if data.user?.role === 'actor'}
@@ -98,14 +106,14 @@
                             onclick={() => (showApplyModal = !showApplyModal)}
                             class="mt-4 cursor-pointer rounded-lg bg-[#35c9b8] px-6 py-3 font-medium text-[#101413] transition-colors hover:bg-[#5fd8ca]"
                         >
-                            {showApplyModal ? 'Close Form' : 'Apply for a role'}
+                            {showApplyModal ? m.film_close_form() : m.film_apply_role()}
                         </button>
                     {:else if !data.user}
                         <a
                             href="/login"
                             class="mt-4 inline-block rounded-lg bg-[#35c9b8] px-6 py-3 font-medium text-[#101413] transition-colors hover:bg-[#5fd8ca]"
                         >
-                            Log in to apply
+                            {m.film_login_to_apply()}
                         </a>
                     {/if}
 
@@ -116,13 +124,13 @@
                                 <p class="text-red-400 text-[14px]">{form.error}</p>
                             {/if}
 
-                            <label class="text-[14px] text-[#a9b0ab]" for="message">Message to the producer (optional):</label>
+                            <label class="text-[14px] text-[#a9b0ab]" for="message">{m.film_message_label()}</label>
                             <textarea
                                 id="message"
                                 name="message"
                                 rows="3"
                                 maxlength="1000"
-                                placeholder="Introduce yourself or write a short note..."
+                                placeholder={m.film_message_ph()}
                                 class="w-full rounded-lg border border-[#2e332f] bg-[#101413] p-3 text-[14px] text-white focus:border-[#35c9b8] focus:outline-none"
                             ></textarea>
 
@@ -130,13 +138,13 @@
                                 type="submit"
                                 class="self-start rounded-lg bg-[#35c9b8] px-5 py-2 font-medium text-[#101413] hover:bg-[#5fd8ca]"
                             >
-                                Submit Application
+                                {m.film_submit()}
                             </button>
                         </form>
                     {/if}
                 </div>
             {:else if data.film.stage === 'coming_soon'}
-                <p class="mt-6 text-[15px] text-[#a9b0ab]">Casting for this production has not opened yet.</p>
+                <p class="mt-6 text-[15px] text-[#a9b0ab]">{m.film_not_open()}</p>
             {/if}
 
             {#if data.film.description}
@@ -149,7 +157,7 @@
                 <div class="mt-6 aspect-video w-full overflow-hidden rounded-[15px]">
                     <iframe
                         src={embedUrl(data.film.trailer_url)}
-                        title="{data.film.title} trailer"
+                        title={m.film_trailer_title({ title: data.film.title })}
                         class="h-full w-full"
                         allowfullscreen
                     ></iframe>
@@ -160,7 +168,7 @@
 
     {#if data.cast && data.cast.length > 0}
         <div class="mt-12">
-            <h2 class="text-[26px]">Cast</h2>
+            <h2 class="text-[26px]">{m.film_cast()}</h2>
             <div class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
                 {#each data.cast as member}
                     <a
@@ -170,7 +178,7 @@
                         <Img src={member.avatar_url} alt={member.name} class="h-[160px] w-full object-cover" />
                         <div class="p-3">
                             <p class="text-[15px]">{member.name}</p>
-                            {#if member.role_name}<p class="text-[13px] text-[#8a8f8c]">as {member.role_name}</p>{/if}
+                            {#if member.role_name}<p class="text-[13px] text-[#8a8f8c]">{m.common_as_role({ role: member.role_name })}</p>{/if}
                         </div>
                     </a>
                 {/each}

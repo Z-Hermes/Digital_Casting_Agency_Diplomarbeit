@@ -1,15 +1,16 @@
    <script>
    	import ActorCard from '$lib/components/ActorCard.svelte';
+   	import { m } from '$lib/paraglide/messages.js';
 
    	let { data } = $props();
    </script>
 
 <svelte:head>
-	<title>Actors | HD Studios</title>
+	<title>{m.actors_title()} | HD Studios</title>
 </svelte:head>
 
 <div class="mx-auto max-w-[1124px] px-5 py-10 text-[#f2f2f0] md:px-10">
-	<h1 class="text-[32px] md:text-[42px]">Actor Database</h1>
+	<h1 class="text-[32px] md:text-[42px]">{m.actors_heading()}</h1>
 	<div class="mt-3 h-1 w-24 rounded-full bg-[#35c9b8]"></div>
 
 	<!-- Filters -->
@@ -18,7 +19,7 @@
 			type="text"
 			name="search"
 			value={data.filters.search}
-			placeholder="Search by name..."
+			placeholder={m.actors_search_ph()}
 			class="flex-1 min-w-[200px] rounded-lg border border-white/10 bg-[#162322] px-4 py-2 text-white outline-none placeholder:text-gray-400 focus:border-teal-400"
 		/>
 
@@ -26,7 +27,7 @@
 			type="text"
 			name="city"
 			value={data.filters.city}
-			placeholder="City"
+			placeholder={m.field_city()}
 			class="rounded-lg border border-white/10 bg-[#162322] px-4 py-2 text-white outline-none placeholder:text-gray-400 focus:border-teal-400"
 		/>
 
@@ -35,10 +36,10 @@
 			value={data.filters.gender}
 			class="rounded-lg border border-white/10 bg-[#162322] px-4 py-2 text-gray-300 outline-none focus:border-teal-400"
 		>
-			<option value="">Any gender</option>
-			<option value="female">Female</option>
-			<option value="male">Male</option>
-			<option value="other">Other</option>
+			<option value="">{m.actors_any_gender()}</option>
+			<option value="female">{m.gender_female()}</option>
+			<option value="male">{m.gender_male()}</option>
+			<option value="other">{m.gender_other()}</option>
 		</select>
 
 		<select
@@ -46,23 +47,23 @@
 			value={data.filters.availability}
 			class="rounded-lg border border-white/10 bg-[#162322] px-4 py-2 text-gray-300 outline-none focus:border-teal-400"
 		>
-			<option value="">Any availability</option>
-			<option value="available">Available</option>
-			<option value="on_set">On set</option>
-			<option value="booked">Booked</option>
+			<option value="">{m.actors_any_availability()}</option>
+			<option value="available">{m.status_available()}</option>
+			<option value="on_set">{m.status_on_set()}</option>
+			<option value="booked">{m.status_booked()}</option>
 		</select>
 
 		<button
 			type="submit"
 			class="rounded-lg bg-teal-400 px-5 py-2 font-medium text-white transition hover:bg-teal-300"
 		>
-			Filter
+			{m.actors_filter()}
 		</button>
 	</form>
 
 	<!-- Results -->
 	{#if data.actors.length === 0}
-		<p class="mt-10 text-[#8a8f8c]">No actors match these filters.</p>
+		<p class="mt-10 text-[#8a8f8c]">{m.actors_no_results()}</p>
 	{:else}
 		<div class="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 			{#each data.actors as actor}

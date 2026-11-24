@@ -4,6 +4,8 @@
 	import { onMount, untrack } from 'svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import StatusBadge from '$lib/components/StatusBadge.svelte';
+	import { m } from '$lib/paraglide/messages.js';
+	import { getLocale } from '$lib/paraglide/runtime.js';
 
 	let { data, form } = $props();
 
@@ -116,14 +118,14 @@
 
 	function timeAgo(date) {
 		const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
-		if (seconds < 60) return 'just now';
+		if (seconds < 60) return m.fyp_just_now();
 		const minutes = Math.floor(seconds / 60);
-		if (minutes < 60) return `${minutes} min ago`;
+		if (minutes < 60) return m.fyp_minutes_ago({ n: minutes });
 		const hours = Math.floor(minutes / 60);
-		if (hours < 24) return `${hours} h ago`;
+		if (hours < 24) return m.fyp_hours_ago({ n: hours });
 		const days = Math.floor(hours / 24);
-		if (days < 7) return `${days} d ago`;
-		return new Date(date).toLocaleDateString();
+		if (days < 7) return m.fyp_days_ago({ n: days });
+		return new Date(date).toLocaleDateString(getLocale());
 	}
 
 	function toastMsg(msg, kind = 'ok') {
@@ -199,9 +201,9 @@
 			const res = await fetch(`/foryoupage?videoId=${post.id}`);
 			if (token !== commentsToken) return;
 			if (res.ok) comments = await res.json();
-			else toastMsg('Could not load comments', 'err');
+			else toastMsg(m.fyp_err_load_comments(), 'err');
 		} catch {
-			if (token === commentsToken) toastMsg('Could not load comments', 'err');
+			if (token === commentsToken) toastMsg(m.fyp_err_load_comments(), 'err');
 		}
 		if (token === commentsToken) commentsLoading = false;
 	}
@@ -226,11 +228,11 @@
 			['video/mp4', 'video/quicktime'].includes(file.type) ||
 			(!file.type && /\.(mp4|mov)$/i.test(file.name));
 		if (!okType) {
-			fileError = 'Only MP4 or MOV videos are allowed (phone camera format).';
+			fileError = m.fyp_err_format();
 			return;
 		}
 		if (file.size > 100 * 1024 * 1024) {
-			fileError = 'The video is too big (max. 100 MB). Tip: record in 1080p instead of 4K.';
+			fileError = m.fyp_err_too_big({ mb: 100 });
 			return;
 		}
 
@@ -247,7 +249,7 @@
 			}
 			fileDuration = probe.duration;
 			if (probe.duration > 60.5) {
-				fileError = `This video is ${Math.ceil(probe.duration)} seconds long (max. 60).`;
+				fileError = m.fyp_err_too_long({ seconds: Math.ceil(probe.duration), max: 60 });
 			}
 		};
 		probe.onerror = () => {
@@ -298,9 +300,9 @@
 		const url = `${location.origin}/foryoupage#video-${post.id}`;
 		try {
 			await navigator.clipboard.writeText(url);
-			toastMsg('Link copied');
+			toastMsg(m.fyp_link_copied());
 		} catch {
-			toastMsg('Could not copy the link', 'err');
+			toastMsg(m.fyp_err_copy(), 'err');
 		}
 	}
 
@@ -406,13 +408,13 @@
 </script>
 
 <svelte:head>
-	<title>For You Page | Digital Casting Agency</title>
+	<title>{m.fyp_title()} | Digital Casting Agency</title>
 </svelte:head>
 
 <div class="relative bg-[#070a09] text-[#f2f2f0]">
 	<div class="stage-glow pointer-events-none fixed inset-0"></div>
 	<div class="grain pointer-events-none fixed inset-0"></div>
-	<p class="side-mark pointer-events-none fixed left-5 top-1/2 hidden lg:block">HD STUDIOS · SELF-TAPES</p>
+	<p class="side-mark pointer-events-none fixed left-5 top-1/2 hidden lg:block">{m.fyp_kicker()}</p>
 
 	<!-- vertical snap feed -->
 	<div
@@ -426,23 +428,23 @@
 			<section class="slide relative flex w-full snap-start items-center justify-center">
 				<div class="frame relative flex w-full max-w-md select-none flex-col items-center justify-center gap-4 overflow-hidden bg-[#162322] px-8 text-center">
 					<span class="text-5xl text-[#35c9b8]/70"><i class="fa-solid fa-clapperboard"></i></span>
-					<h2 class="text-[24px] font-semibold">No self-tapes yet</h2>
+					<h2 class="text-[24px] font-semibold">{m.fyp_empty_title()}</h2>
 					<p class="text-[15px] text-[#8a8f8c]">
-						Sixty seconds that get you cast. The first tape starts the feed.
+						{m.fyp_empty_text()}
 					</p>
 					{#if data.user?.role === 'actor'}
 						<button
 							onclick={openUpload}
 							class="mt-2 flex cursor-pointer items-center gap-2 rounded-full bg-[#35c9b8] px-6 py-2.5 text-[15px] font-semibold text-[#101413] transition hover:bg-[#5fd8ca]"
 						>
-							<span><i class="fa-solid fa-video"></i></span> Upload your self-tape
+							<span><i class="fa-solid fa-video"></i></span> {m.fyp_upload_cta()}
 						</button>
 					{:else}
 						<a
 							href="/actors"
 							class="mt-2 rounded-full border border-[#35c9b8] px-6 py-2.5 text-[15px] font-medium text-[#35c9b8] transition hover:bg-[#084a43]"
 						>
-							Browse actors
+							{m.fyp_browse_actors()}
 						</a>
 					{/if}
 				</div>
@@ -461,7 +463,7 @@
 					{#if failed[post.id]}
 						<div class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-b from-[#162322] to-[#0d1413] text-center">
 							<span class="text-4xl text-[#35c9b8]/50"><i class="fa-solid fa-film"></i></span>
-							<p class="text-[14px] text-[#8a8f8c]">This video is unavailable.</p>
+							<p class="text-[14px] text-[#8a8f8c]">{m.fyp_unavailable()}</p>
 						</div>
 					{:else}
 						<!-- svelte-ignore a11y_media_has_caption -->
@@ -517,7 +519,7 @@
 							<span class="flex h-16 w-16 items-center justify-center rounded-full bg-[#35c9b8] text-2xl text-[#101413]">
 								<i class="fa-solid fa-play"></i>
 							</span>
-							<span class="text-[13px] font-medium">Tap to play</span>
+							<span class="text-[13px] font-medium">{m.fyp_tap_to_play()}</span>
 						</button>
 					{/if}
 
@@ -555,7 +557,7 @@
 								<i class="fa-solid fa-clapperboard"></i>
 							</span>
 							<div>
-								<p class="text-[15px] font-semibold leading-none tracking-wide">For You</p>
+								<p class="text-[15px] font-semibold leading-none tracking-wide">{m.fyp_for_you()}</p>
 								<p class="mt-1 text-[11px] leading-none text-white/50">
 									{activeIndex + 1} / {data.posts.length} · {data.mode === 'personal' ? 'picked for you' : 'popular now'}
 								</p>
@@ -564,8 +566,8 @@
 						<div class="flex items-center gap-2">
 							<button
 								onclick={() => (muted = !muted)}
-								aria-label={muted ? 'Turn sound on' : 'Mute'}
-								title={muted ? 'Turn sound on (M)' : 'Mute (M)'}
+								aria-label={muted ? m.fyp_sound_on() : m.fyp_mute()}
+								title={muted ? m.fyp_sound_on_key() : m.fyp_mute_key()}
 								class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-black/40 text-[15px] backdrop-blur-md transition hover:scale-105 hover:bg-black/60 {muted
 									? 'sound-hint text-white'
 									: 'text-[#35c9b8]'}"
@@ -579,7 +581,7 @@
 							{#if data.user?.role === 'actor'}
 								<button
 									onclick={openUpload}
-									aria-label="Upload a self-tape"
+									aria-label={m.fyp_upload_heading()}
 									class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[#35c9b8] text-[17px] text-[#101413] shadow-[0_0_24px_rgba(53,201,184,0.45)] transition hover:scale-105 hover:bg-[#5fd8ca]"
 								>
 									<span><i class="fa-solid fa-plus"></i></span>
@@ -592,7 +594,7 @@
 					<div class="absolute bottom-24 right-3 z-30 flex flex-col items-center gap-4">
 						<a
 							href="/user/{post.username}"
-							aria-label="{post.name}'s profile"
+							aria-label={m.fyp_profile_of({ name: post.name })}
 							class="mb-1 rounded-full ring-2 ring-[#35c9b8] ring-offset-2 ring-offset-black/40 transition hover:scale-105"
 						>
 							<Avatar src={post.avatar_url} alt={post.name} class="h-11 w-11" />
@@ -620,13 +622,13 @@
 										overrides = {};
 									} else {
 										overrides[id] = { ...overrides[id], liked: before.liked, likes: before.likes };
-										toastMsg('Could not save your like', 'err');
+										toastMsg(m.fyp_err_like(), 'err');
 									}
 								};
 							}}
 						>
 							<input type="hidden" name="videoId" value={post.id} />
-							<button class="group flex cursor-pointer flex-col items-center gap-1" aria-label={v.liked ? 'Unlike' : 'Like'}>
+							<button class="group flex cursor-pointer flex-col items-center gap-1" aria-label={v.liked ? m.fyp_unlike() : m.fyp_like()}>
 								<span class="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-black/40 text-xl backdrop-blur-md transition group-hover:scale-105 group-hover:bg-black/60">
 									{#key v.liked}
 										<span class={v.liked ? 'heart-pop text-[#ff3b5c]' : 'text-white'}>
@@ -638,18 +640,18 @@
 							</button>
 						</form>
 
-						<button onclick={() => openComments(post)} class="group flex cursor-pointer flex-col items-center gap-1" aria-label="Comments">
+						<button onclick={() => openComments(post)} class="group flex cursor-pointer flex-col items-center gap-1" aria-label={m.fyp_comments()}>
 							<span class="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-black/40 text-xl backdrop-blur-md transition group-hover:scale-105 group-hover:bg-black/60">
 								<span class="text-white"><i class="fa-solid fa-comment"></i></span>
 							</span>
 							<span class="text-xs font-semibold drop-shadow">{fmt(v.comments)}</span>
 						</button>
 
-						<button onclick={() => share(post)} class="group flex cursor-pointer flex-col items-center gap-1" aria-label="Copy link to this self-tape">
+						<button onclick={() => share(post)} class="group flex cursor-pointer flex-col items-center gap-1" aria-label={m.fyp_copy_link()}>
 							<span class="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-black/40 text-xl backdrop-blur-md transition group-hover:scale-105 group-hover:bg-black/60">
 								<span class="text-white"><i class="fa-solid fa-share"></i></span>
 							</span>
-							<span class="text-xs font-semibold drop-shadow">Share</span>
+							<span class="text-xs font-semibold drop-shadow">{m.fyp_share()}</span>
 						</button>
 
 						{#if data.user && data.user.id === post.user_id}
@@ -657,7 +659,7 @@
 								method="POST"
 								action="?/deleteVideo"
 								onsubmit={(e) => {
-									if (!confirm('Delete this self-tape? It is removed from your profile and the feed.'))
+									if (!confirm(m.fyp_confirm_delete()))
 										e.preventDefault();
 								}}
 								use:enhance={({ formData }) => {
@@ -667,18 +669,18 @@
 											if (commentsFor?.id === id) closeComments();
 											await update({ reset: false });
 											overrides = {};
-											toastMsg('Self-tape deleted');
+											toastMsg(m.fyp_deleted());
 										} else if (result.type === 'redirect') {
 											goto(result.location);
 										} else {
 											await update({ reset: false });
-											toastMsg('Could not delete the video', 'err');
+											toastMsg(m.fyp_err_delete_video(), 'err');
 										}
 									};
 								}}
 							>
 								<input type="hidden" name="videoId" value={post.id} />
-								<button class="group flex cursor-pointer flex-col items-center gap-1" aria-label="Delete self-tape">
+								<button class="group flex cursor-pointer flex-col items-center gap-1" aria-label={m.fyp_delete_selftape()}>
 									<span class="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-black/40 text-lg text-white/70 backdrop-blur-md transition group-hover:scale-105 group-hover:bg-[#3a1414] group-hover:text-[#ff8a8a]">
 										<span><i class="fa-solid fa-trash"></i></span>
 									</span>
@@ -700,7 +702,7 @@
 						<div class="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] text-white/70">
 							<span class="flex items-center gap-1.5 rounded-full border border-[#35c9b8]/40 bg-[#0f2523]/80 px-2 py-0.5 font-medium text-[#7ef0e0]">
 								<span><i class="fa-solid fa-clapperboard"></i></span>
-								Self-tape{#if durations[post.id]} · {durationLabel(durations[post.id])}{/if}
+								{m.fyp_selftape()}{#if durations[post.id]} · {durationLabel(durations[post.id])}{/if}
 							</span>
 							
 							{#if post.city}
@@ -723,7 +725,7 @@
 					{#if i === 0 && !scrolled && data.posts.length > 1}
 						<div class="pointer-events-none absolute bottom-2 left-1/2 z-30 -translate-x-1/2 text-center text-white/60">
 							<span class="hint-bounce block text-[14px]"><i class="fa-solid fa-chevron-up"></i></span>
-							<p class="text-[10px] tracking-widest">SWIPE</p>
+							<p class="text-[10px] tracking-widest">{m.fyp_swipe()}</p>
 						</div>
 					{/if}
 
@@ -760,10 +762,10 @@
 						<div class="absolute inset-0 z-40 bg-black/50" onclick={closeComments} role="presentation"></div>
 						<div class="drawer absolute inset-x-0 bottom-0 z-50 flex h-[68%] flex-col rounded-t-[20px] border-t border-[#2e332f] bg-[#141917]/95 backdrop-blur-xl">
 							<div class="flex items-center justify-between border-b border-[#2e332f] px-4 py-3">
-								<p class="text-[15px] font-semibold">{fmt(v.comments)} comments</p>
+								<p class="text-[15px] font-semibold">{m.fyp_comments_count({ count: fmt(v.comments) })}</p>
 								<button
 									onclick={closeComments}
-									aria-label="Close comments"
+									aria-label={m.fyp_close_comments()}
 									class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-[#8a8f8c] transition hover:bg-[#232825] hover:text-white"
 								>
 									<span><i class="fa-solid fa-xmark"></i></span>
@@ -778,7 +780,7 @@
 								{:else if comments.length === 0}
 									<div class="flex h-full flex-col items-center justify-center gap-2 text-center">
 										<span class="text-2xl text-[#35c9b8]/60"><i class="fa-regular fa-comment"></i></span>
-										<p class="text-[14px] text-[#8a8f8c]">No comments yet. Start the conversation.</p>
+										<p class="text-[14px] text-[#8a8f8c]">{m.fyp_no_comments()}</p>
 									</div>
 								{:else}
 									<ul class="flex flex-col gap-4">
@@ -806,14 +808,14 @@
 																} else if (result.type === 'redirect') {
 																	goto(result.location);
 																} else {
-																	toastMsg('Could not delete the comment', 'err');
+																	toastMsg(m.fyp_err_delete_comment(), 'err');
 																}
 															};
 														}}
 													>
 														<input type="hidden" name="commentId" value={c.id} />
 														<button
-															aria-label="Delete comment"
+															aria-label={m.fyp_delete_comment()}
 															class="cursor-pointer text-[12px] text-[#8a8f8c] opacity-0 transition group-hover:opacity-100 hover:text-[#ff8a8a]"
 														>
 															<span><i class="fa-solid fa-trash"></i></span>
@@ -864,7 +866,7 @@
 												} else {
 													comments = comments.filter((x) => x.id !== temp.id);
 													bump(id, -1);
-													toastMsg('Could not post the comment', 'err');
+													toastMsg(m.fyp_err_post_comment(), 'err');
 												}
 											};
 										}}
@@ -874,13 +876,13 @@
 											bind:value={commentBody}
 											name="body"
 											maxlength="300"
-											placeholder="Add a comment…"
-											aria-label="Add a comment"
+											placeholder={m.fyp_add_comment_ph()}
+											aria-label={m.fyp_add_comment()}
 											class="min-w-0 flex-1 rounded-full border border-[#2e332f] bg-[#232825] px-4 py-2 text-[14px] outline-none transition focus:border-[#35c9b8]"
 										/>
 										<button
 											disabled={!commentBody.trim()}
-											aria-label="Send comment"
+											aria-label={m.fyp_send_comment()}
 											class="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#35c9b8] text-[#101413] transition hover:bg-[#5fd8ca] disabled:cursor-default disabled:opacity-40"
 										>
 											<span><i class="fa-solid fa-paper-plane"></i></span>
@@ -888,7 +890,7 @@
 									</form>
 								{:else}
 									<p class="py-1 text-center text-[14px] text-[#8a8f8c]">
-										<a href="/login" class="text-[#35c9b8] hover:underline">Log in</a> to comment.
+										<a href="/login" class="text-[#35c9b8] hover:underline">{m.common_login()}</a> {m.fyp_login_to_comment()}
 									</p>
 								{/if}
 							</div>
@@ -914,22 +916,22 @@
 				class="modal-card themed-scroll max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[20px] border border-[#2e332f] bg-[#141917] p-5 shadow-[0_30px_90px_rgba(0,0,0,0.6)]"
 				onclick={(e) => e.stopPropagation()}
 				role="dialog"
-				aria-label="Upload a self-tape"
+				aria-label={m.fyp_upload_heading()}
 				tabindex="-1"
 			>
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-2.5">
 						<span class="text-[18px] text-[#35c9b8]"><i class="fa-solid fa-clapperboard"></i></span>
 						<div>
-							<h2 class="text-[18px] font-semibold leading-none">Upload a self-tape</h2>
+							<h2 class="text-[18px] font-semibold leading-none">{m.fyp_upload_heading()}</h2>
 							<p class="mt-1 text-[11px] leading-none text-[#8a8f8c]">
-								{data.myVideos}/{data.maxVideos} used · shows on your profile + the feed
+								{m.fyp_used({ used: data.myVideos, max: data.maxVideos })}
 							</p>
 						</div>
 					</div>
 					<button
 						onclick={closeUpload}
-						aria-label="Close"
+						aria-label={m.common_close()}
 						class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-[#8a8f8c] transition hover:bg-[#232825] hover:text-white"
 					>
 						<span><i class="fa-solid fa-xmark"></i></span>
@@ -940,10 +942,10 @@
 					<div class="mt-4 flex flex-col items-center gap-3 py-6 text-center">
 						<span class="text-3xl text-[#e0b45a]"><i class="fa-solid fa-circle-exclamation"></i></span>
 						<p class="text-[15px] text-[#c7cdc9]">
-							You already have {data.maxVideos} self-tapes. Delete one to upload a new one.
+							{m.fyp_max_reached({ max: data.maxVideos })}
 						</p>
 						<a href="/my-videos" class="rounded-[12px] bg-[#35c9b8] px-6 py-2 text-[15px] font-semibold text-[#101413] transition hover:bg-[#5fd8ca]">
-							Manage my videos
+							{m.fyp_manage_videos()}
 						</a>
 					</div>
 								{:else}
@@ -955,8 +957,7 @@
 						use:enhance={({ cancel }) => {
 							if (checking || fileError || !fileInput?.files?.length || selectedTags.length === 0) {
 								cancel();
-								if (!fileInput?.files?.length) fileError = 'Please choose a video.';
-								if (selectedTags.length === 0) tagError = 'Pick at least one tag.';
+								if (!fileInput?.files?.length) fileError = m.fyp_err_choose_video();
 								return;
 							}
 							uploading = true;
@@ -966,7 +967,7 @@
 									await update({ reset: false });
 									overrides = {};
 									closeUpload();
-									toastMsg('Self-tape posted');
+									toastMsg(m.fyp_posted());
 									feedEl?.scrollTo({ top: 0, behavior: 'smooth' });
 								} else if (result.type === 'redirect') {
 									goto(result.location);
@@ -1014,12 +1015,12 @@
 						</label>
 
 						{#if checking}
-							<p class="text-[13px] text-[#8a8f8c]">Checking video length…</p>
+							<p class="text-[13px] text-[#8a8f8c]">{m.common_checking_length()}</p>
 						{:else if fileDuration !== null}
-							<p class="text-[13px] text-[#7ef0e0]">Length: {Math.round(fileDuration)} seconds ✓</p>
+							<p class="text-[13px] text-[#7ef0e0]">{m.common_length_ok({ seconds: Math.round(fileDuration) })}</p>
 						{:else if unchecked}
 							<p class="text-[13px] text-[#8a8f8c]">
-								Length could not be checked in this browser — the server will check it.
+								{m.common_length_unknown()}
 							</p>
 						{/if}
 						{#if fileError}
@@ -1064,8 +1065,8 @@
 								name="caption"
 								rows="2"
 								maxlength="300"
-								placeholder="Caption — e.g. “Dramatic monologue, available from spring” (optional)"
-								aria-label="Caption"
+								placeholder={m.fyp_caption_ph()}
+								aria-label={m.fyp_caption()}
 								class="w-full resize-none rounded-[12px] border border-[#2e332f] bg-[#232825] px-4 py-2.5 text-[14px] outline-none transition focus:border-[#35c9b8]"
 							></textarea>
 							<p class="mt-1 text-right text-[11px] text-[#8a8f8c]">{caption.length}/300</p>
@@ -1076,12 +1077,12 @@
 							class="flex cursor-pointer items-center justify-center gap-2 rounded-[12px] bg-[#35c9b8] py-2.5 text-[15px] font-semibold text-[#101413] transition hover:bg-[#5fd8ca] disabled:cursor-wait disabled:opacity-60"
 						>
 							{#if uploading}
-								<span><i class="fa-solid fa-circle-notch fa-spin"></i></span> Uploading… big files take a moment
+								<span><i class="fa-solid fa-circle-notch fa-spin"></i></span> {m.fyp_uploading()}
 							{:else}
-								<span><i class="fa-solid fa-paper-plane"></i></span> Post self-tape
+								<span><i class="fa-solid fa-paper-plane"></i></span> {m.fyp_post()}
 							{/if}
 						</button>
-						<p class="text-center text-[12px] text-[#8a8f8c]">Tip: record in 1080p, not 4K.</p>
+						<p class="text-center text-[12px] text-[#8a8f8c]">{m.common_tip_1080p()}</p>
 					</form>
 				{/if}
 			</div>

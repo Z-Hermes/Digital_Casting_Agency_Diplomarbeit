@@ -1,12 +1,12 @@
 <script>
 	import { enhance } from '$app/forms';
+	import { m } from '$lib/paraglide/messages.js';
 
 	// form:        the result of a failed submit (error + values), from the page
 	// initial:     values to start with (edit page: the saved film)
 	// submitLabel: text of the save button
 	// cancelHref:  where "Cancel" goes
-	let { form, initial = {}, submitLabel = 'Save', cancelHref = '/films' } = $props();
-
+	let { form, initial = {}, submitLabel = m.common_save(), cancelHref = '/films' } = $props();
 	const start = form?.values ?? initial;
 
 	// the deadline field is only needed while the film is casting
@@ -20,7 +20,7 @@
 
 <form method="POST" use:enhance class="mt-8 space-y-6">
 	<div>
-		<label for="title" class={labelClass}>Title</label>
+		<label for="title" class={labelClass}>{m.filmform_title()}</label>
 		<input
 			id="title"
 			name="title"
@@ -34,7 +34,7 @@
 
 	<div class="grid gap-6 sm:grid-cols-2">
 		<div>
-			<label for="year" class={labelClass}>Year</label>
+			<label for="year" class={labelClass}>{m.filmform_year()}</label>
 			<input
 				id="year"
 				name="year"
@@ -48,19 +48,19 @@
 		</div>
 
 		<div>
-			<label for="stage" class={labelClass}>Stage</label>
+			<label for="stage" class={labelClass}>{m.filmform_stage()}</label>
 			<select id="stage" name="stage" bind:value={stage} class={inputClass}>
-				<option value="coming_soon">Coming soon</option>
-				<option value="casting">Casting open</option>
-				<option value="in_production">In production</option>
-				<option value="released">Released</option>
+				<option value="coming_soon">{m.stage_coming_soon_title()}</option>
+				<option value="casting">{m.stage_casting_badge()}</option>
+				<option value="in_production">{m.stage_in_production_title()}</option>
+				<option value="released">{m.stage_released_title()}</option>
 			</select>
 		</div>
 	</div>
 
 	{#if stage === 'casting'}
 		<div>
-			<label for="casting_deadline" class={labelClass}>Applications close on</label>
+			<label for="casting_deadline" class={labelClass}>{m.filmform_deadline()}</label>
 			<input
 				id="casting_deadline"
 				name="casting_deadline"
@@ -69,37 +69,37 @@
 				value={start.casting_deadline ?? ''}
 				class={inputClass}
 			/>
-			<p class={hintClass}>Actors can apply until this day.</p>
+			<p class={hintClass}>{m.filmform_deadline_hint()}</p>
 		</div>
 	{/if}
 
 	<div>
-		<label for="description" class={labelClass}>Description</label>
+		<label for="description" class={labelClass}>{m.filmform_description()}</label>
 		<textarea
 			id="description"
 			name="description"
 			rows="6"
 			maxlength="3000"
-			placeholder="What is the film about? Where and when is it shot?"
+			placeholder={m.filmform_description_ph()}
 			class={inputClass}>{start.description ?? ''}</textarea
 		>
 	</div>
 
 	<div>
-		<label for="poster_url" class={labelClass}>Poster (optional)</label>
+		<label for="poster_url" class={labelClass}>{m.filmform_poster()}</label>
 		<input
 			id="poster_url"
 			name="poster_url"
 			type="text"
 			maxlength="500"
-			placeholder="/media/poster.jpg or https://..."
+			placeholder={m.filmform_poster_ph()}
 			value={start.poster_url ?? ''}
 			class={inputClass}
 		/>
 	</div>
 
 	<div>
-		<label for="trailer_url" class={labelClass}>Trailer link (optional)</label>
+		<label for="trailer_url" class={labelClass}>{m.filmform_trailer()}</label>
 		<input
 			id="trailer_url"
 			name="trailer_url"
@@ -128,7 +128,7 @@
 			href={cancelHref}
 			class="rounded-lg border border-white/20 px-6 py-3 text-[#e4e6e4] transition hover:border-white/40"
 		>
-			Cancel
+			{m.common_add_photos_cancel()}
 		</a>
 	</div>
 </form>

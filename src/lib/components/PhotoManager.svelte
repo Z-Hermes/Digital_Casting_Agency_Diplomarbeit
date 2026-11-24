@@ -4,6 +4,7 @@
 	// The page needs the form actions: avatar, removeAvatar, gallery, deletePhoto
 	// (see src/lib/server/photos.js).
 	// Use:  <PhotoManager name={actor.name} avatarUrl={data.avatarUrl} photos={data.photos} {form} />
+	import { m } from '$lib/paraglide/messages.js';
 	import Avatar from './Avatar.svelte';
 
 	let { name = '', avatarUrl = null, photos = [], form = null, showAvatar = true } = $props();	// asks before deleting; "Cancel" stops the form
@@ -33,7 +34,7 @@
 	{#if showAvatar}
 	<!-- ===== Profile picture ===== -->
 	<div class="rounded-[15px] border border-[#2e332f] bg-[#1b201d] p-5 md:p-6">
-		<h2 class="text-[18px]">Profile picture</h2>
+		<h2 class="text-[18px]">{m.common_profile_picture()}</h2>
 
 		<div class="mt-4 flex flex-col gap-5 sm:flex-row sm:items-center">
 			<Avatar src={avatarUrl} alt={name} class="h-28 w-28 shrink-0" />
@@ -42,19 +43,19 @@
 				<form method="POST" action="?/avatar" enctype="multipart/form-data" class="flex flex-col gap-3 sm:flex-row sm:items-center">
 					<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" required class={fileInput} />
 					<button class="{button} shrink-0 bg-[#35c9b8] font-medium text-[#101413] hover:bg-[#5fd8ca]">
-						Upload
+						{m.common_upload()}
 					</button>
 				</form>
 
 				{#if avatarUrl}
-					<form method="POST" action="?/removeAvatar" onsubmit={confirmAction('Remove the profile picture?')}>
+					<form method="POST" action="?/removeAvatar" onsubmit={confirmAction(m.photos_confirm_remove_picture())}>
 						<button class="{button} border border-[#e05a5a]/70 text-[#f5c4c4] hover:bg-[#3a1414]">
-							Remove picture
+							{m.photos_remove_picture()}
 						</button>
 					</form>
 				{/if}
 
-				<p class="text-[13px] text-[#8a8f8c]">JPG, PNG or WebP, max. 5 MB.</p>
+				<p class="text-[13px] text-[#8a8f8c]">{m.photos_hint()}</p>
 			</div>
 		</div>
 	</div>
@@ -62,32 +63,32 @@
 
 	<!-- ===== Gallery ===== -->
 	<div class="rounded-[15px] border border-[#2e332f] bg-[#1b201d] p-5 md:p-6">
-		<h2 class="text-[18px]">Gallery <span class="text-[#8a8f8c]">{photos.length}</span></h2>
+		<h2 class="text-[18px]">{m.photos_gallery()} <span class="text-[#8a8f8c]">{photos.length}</span></h2>
 
 		<form method="POST" action="?/gallery" enctype="multipart/form-data" class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
 			<input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple required class={fileInput} />
 			<button class="{button} shrink-0 bg-[#35c9b8] font-medium text-[#101413] hover:bg-[#5fd8ca]">
-				Add photos
+				{m.common_add_photos()}
 			</button>
 		</form>
-		<p class="mt-2 text-[13px] text-[#8a8f8c]">You can choose several pictures at once (max. 20 in total).</p>
+		<p class="mt-2 text-[13px] text-[#8a8f8c]">{m.photos_multiple_hint()}</p>
 
 		{#if photos.length === 0}
-			<p class="mt-5 text-[15px] text-[#8a8f8c]">No gallery photos yet.</p>
+			<p class="mt-5 text-[15px] text-[#8a8f8c]">{m.photos_no_gallery()}</p>
 		{:else}
 			<ul class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
 				{#each photos as photo (photo.id)}
 					<li class="relative overflow-hidden rounded-[12px] border border-[#2e332f]">
-						<img src={photo.url} alt="Gallery" class="aspect-square w-full object-cover" />
+						<img src={photo.url} alt="{m.photos_gallery()}" class="aspect-square w-full object-cover" />
 						<form
 							method="POST"
 							action="?/deletePhoto"
-							onsubmit={confirmAction('Delete this photo?')}
+							onsubmit={confirmAction(m.common_confirm_delete_photo())}
 							class="absolute top-2 right-2"
 						>
 							<input type="hidden" name="photoId" value={photo.id} />
 							<button
-								aria-label="Delete photo"
+								aria-label="{m.common_delete_photo()}"
 								class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[#101413]/80 text-[16px] text-[#f5c4c4] transition-colors hover:bg-[#3a1414]"
 							>
 								✕

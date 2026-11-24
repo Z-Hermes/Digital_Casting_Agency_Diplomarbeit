@@ -4,12 +4,13 @@
 	//   <StatusBadge status={actor.availability} />   ('available', 'on_set', 'booked')
 	//   <StatusBadge status="Booked" />
 	let { status = 'available', class: className = '' } = $props();
+	import { m } from '$lib/paraglide/messages.js';
 
 	// database value -> text and colors (green / yellow / red)
 	const badges = {
-		available: { label: 'Available', color: 'bg-[#12301f] border-[#5cc489] text-[#c8f0d8]' },
-		on_set: { label: 'On set', color: 'bg-[#3a3110] border-[#e0b84a] text-[#f5e3b0]' },
-		booked: { label: 'Booked', color: 'bg-[#3a1414] border-[#e05a5a] text-[#f5c4c4]' }
+				available: { label: m.status_available(), color: 'bg-[#12301f] border-[#5cc489] text-[#c8f0d8]' },
+		on_set: { label: m.status_on_set(), color: 'bg-[#3a3110] border-[#e0b84a] text-[#f5e3b0]' },
+		booked: { label: m.status_booked(), color: 'bg-[#3a1414] border-[#e05a5a] text-[#f5c4c4]' }
 	};
 
 	// "On set" -> "on_set", "Booked" -> "booked"
