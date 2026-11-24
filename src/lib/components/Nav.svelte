@@ -42,6 +42,7 @@
 				<a href="/news" onclick={close} class="hover:text-[#35c9b8]">{m.nav_news()}</a>
 				<a href="/films" onclick={close} class="hover:text-[#35c9b8]">{m.nav_films()}</a>
 				<a href="/foryoupage" onclick={close} class="hover:text-[#35c9b8]">{m.nav_fyp()}</a>
+
 				<LanguageSwitcher />
                 
 				<!-- only admins see this link -->

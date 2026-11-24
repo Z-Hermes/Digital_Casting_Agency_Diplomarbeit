@@ -7,12 +7,13 @@ import { UPLOAD_DIR, deleteImage } from './uploads.js';
 
 // Self-tape videos: actors upload short clips of themselves (max. 1 minute).
 // Saved in the same "uploads" folder as the pictures, served through
-// /uploads/[file]. Stored in the existing media table with type = 'video'
-// (no database change needed).
+// /uploads/[file]. Stored in the media table with type = 'video'.
+// These rows power BOTH the profile "Videos" block and the For You feed.
 
 const MAX_SIZE = 100 * 1024 * 1024; // 100 MB per video
 const MAX_DURATION = 60; // seconds
 const TOLERANCE = 0.5; // phones often record "60 s" as 60.03 s
+const MAX_CAPTION = 300;
 export const MAX_VIDEOS = 3;
 
 const VIDEO_TYPES = {
@@ -114,7 +115,7 @@ export async function saveVideo(file) {
 	return `/uploads/${fileName}`;
 }
 
-// ---------- database (same pattern as photos.js) ----------
+// ---------- database ----------
 
 export async function loadVideos(userId) {
 	const [videos] = await db.execute(
@@ -124,10 +125,23 @@ export async function loadVideos(userId) {
 	return videos;
 }
 
+export async function countVideos(userId) {
+	const [rows] = await db.execute(
+		`SELECT COUNT(*) AS total FROM media WHERE user_id = ? AND type = 'video'`,
+		[userId]
+	);
+	return rows[0].total;
+}
+
 export async function uploadVideo(userId, formData) {
 	const file = formData.get('video');
+	const caption = String(formData.get('caption') ?? '').trim();
+
 	const problem = checkVideo(file);
 	if (problem) return fail(400, { videoError: problem });
+	if (caption.length > MAX_CAPTION) {
+		return fail(400, { videoError: `The caption can have at most ${MAX_CAPTION} characters.` });
+	}
 
 	const [count] = await db.execute(
 		`SELECT COUNT(*) AS total, COALESCE(MAX(sort_order), 0) AS last
@@ -154,8 +168,9 @@ export async function uploadVideo(userId, formData) {
 	}
 
 	await db.execute(
-		`INSERT INTO media (user_id, type, url, size, sort_order) VALUES (?, 'video', ?, 'wide', ?)`,
-		[userId, url, Number(count[0].last) + 1]
+		`INSERT INTO media (user_id, type, url, size, sort_order, caption)
+		 VALUES (?, 'video', ?, 'wide', ?, ?)`,
+		[userId, url, Number(count[0].last) + 1, caption || null]
 	);
 	return { videoMessage: 'Video added.' };
 }
