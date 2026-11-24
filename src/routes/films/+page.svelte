@@ -1,6 +1,7 @@
 <script>
     import FilmCard from '$lib/components/FilmCard.svelte';
     import { filmStages } from '$lib/filmStages.js';
+    import { m } from '$lib/paraglide/messages.js';
 
     let { data } = $props();
 
@@ -13,16 +14,16 @@
 </script>
 
 <svelte:head>
-    <title>Films | HD Studios</title>
+    <title>{m.films_title()} | HD Studios</title>
 </svelte:head>
 
 <div class="mx-auto max-w-[1124px] px-5 py-10 text-[#f2f2f0] md:px-10">
-    <h1 class="text-[32px] md:text-[42px]">Films</h1>
+    <h1 class="text-[32px] md:text-[42px]">{m.films_title()}</h1>
     <div class="mt-3 h-1 w-24 rounded-full bg-[#35c9b8]"></div>
 
 
     {#if sections.length === 0}
-        <p class="mt-10 text-[#8a8f8c]">No films yet.</p>
+        <p class="mt-10 text-[#8a8f8c]">{m.films_empty()}</p>
     {:else}
         <!-- jump links to the sections -->
         <nav class="mt-8 flex flex-wrap gap-2">

@@ -1,16 +1,16 @@
    <script>
    	import ActorCard from '$lib/components/ActorCard.svelte';
-	import { m } from '$lib/paraglide/messages.js';
+   	import { m } from '$lib/paraglide/messages.js';
 
    	let { data } = $props();
    </script>
 
 <svelte:head>
-	<title>Actors | HD Studios</title>
+	<title>{m.actors_title()} | HD Studios</title>
 </svelte:head>
 
 <div class="mx-auto max-w-[1124px] px-5 py-10 text-[#f2f2f0] md:px-10">
-	<h1 class="text-[32px] md:text-[42px]">{m.actors_title()}</h1>
+	<h1 class="text-[32px] md:text-[42px]">{m.actors_heading()}</h1>
 	<div class="mt-3 h-1 w-24 rounded-full bg-[#35c9b8]"></div>
 
 	<!-- Filters -->
@@ -27,7 +27,7 @@
 			type="text"
 			name="city"
 			value={data.filters.city}
-			placeholder={m.actors_city()}
+			placeholder={m.field_city()}
 			class="rounded-lg border border-white/10 bg-[#162322] px-4 py-2 text-white outline-none placeholder:text-gray-400 focus:border-teal-400"
 		/>
 
@@ -37,9 +37,9 @@
 			class="rounded-lg border border-white/10 bg-[#162322] px-4 py-2 text-gray-300 outline-none focus:border-teal-400"
 		>
 			<option value="">{m.actors_any_gender()}</option>
-			<option value="female">{m.actors_female()}</option>
-			<option value="male">{m.actors_male()}</option>
-			<option value="other">{m.actors_other()}</option>
+			<option value="female">{m.gender_female()}</option>
+			<option value="male">{m.gender_male()}</option>
+			<option value="other">{m.gender_other()}</option>
 		</select>
 
 		<select
@@ -48,16 +48,16 @@
 			class="rounded-lg border border-white/10 bg-[#162322] px-4 py-2 text-gray-300 outline-none focus:border-teal-400"
 		>
 			<option value="">{m.actors_any_availability()}</option>
-			<option value="available">{m.actors_available()}</option>
-			<option value="on_set">{m.actors_on_set()}</option>
-			<option value="booked">{m.actors_booked()}</option>
+			<option value="available">{m.status_available()}</option>
+			<option value="on_set">{m.status_on_set()}</option>
+			<option value="booked">{m.status_booked()}</option>
 		</select>
 
 		<button
 			type="submit"
 			class="rounded-lg bg-teal-400 px-5 py-2 font-medium text-white transition hover:bg-teal-300"
 		>
-			Filter
+			{m.actors_filter()}
 		</button>
 	</form>
 

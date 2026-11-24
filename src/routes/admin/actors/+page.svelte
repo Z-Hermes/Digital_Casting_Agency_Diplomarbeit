@@ -2,6 +2,7 @@
 	import Avatar from '$lib/components/Avatar.svelte';
 	import StatusBadge from '$lib/components/StatusBadge.svelte';
 	import SearchBar from '$lib/components/SearchBar.svelte';
+	import { m } from '$lib/paraglide/messages.js';
 
 	let { data, form } = $props();
 
@@ -14,22 +15,21 @@
 </script>
 
 <svelte:head>
-	<title>Manage actors | HD Studios</title>
+	<title>{m.admin_title()} | HD Studios</title>
 </svelte:head>
 
 <div class="mx-auto max-w-[1124px] px-5 py-10 text-[#f2f2f0] md:px-10">
 	<div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
 		<div>
-			<p class="text-[14px] text-[#35c9b8]">Admin</p>
-			<h1 class="text-[32px] md:text-[42px]">Manage actors</h1>
+			<p class="text-[14px] text-[#35c9b8]">{m.nav_admin()}</p>
+			<h1 class="text-[32px] md:text-[42px]">{m.admin_title()}</h1>
 			<p class="mt-1 text-[15px] text-[#8a8f8c]">
-				{data.actors.length}
-				{data.actors.length === 1 ? 'actor' : 'actors'}{#if data.search}&nbsp;found for "{data.search}"{/if}
+				{data.actors.length === 1 ? m.admin_count_one({ count: 1 }) : m.admin_count_many({ count: data.actors.length })}{#if data.search}&nbsp;{m.admin_found_for({ search: data.search })}{/if}
 			</p>
 		</div>
 
 		<form method="GET">
-			<SearchBar value={data.search} placeholder="Search actors" />
+			<SearchBar value={data.search} placeholder={m.admin_search_ph()} />
 		</form>
 	</div>
 
@@ -45,7 +45,7 @@
 	{/if}
 
 	{#if data.actors.length === 0}
-		<p class="mt-10 text-[#8a8f8c]">No actors found.</p>
+		<p class="mt-10 text-[#8a8f8c]">{m.admin_no_actors()}</p>
 	{:else}
 		<ul class="mt-6 flex flex-col gap-3">
 			{#each data.actors as actor (actor.id)}
@@ -62,7 +62,7 @@
 								{actor.name}
 								{#if actor.blocked}
 									<span class="rounded-full border border-[#666] bg-[#222] px-2.5 py-0.5 text-[12px] text-[#ccc]">
-										Deactivated
+										{m.admin_deactivated()}
 									</span>
 								{/if}
 							</p>
@@ -72,7 +72,7 @@
 
 					<!-- profile info -->
 					<div class="flex items-center gap-4 text-[14px] text-[#c7cdc9] lg:w-[220px]">
-						<span class="w-[90px]">{actor.city ?? 'No city'}</span>
+						<span class="w-[90px]">{actor.city ?? m.admin_no_city()}</span>
 						{#if actor.availability}
 							<StatusBadge status={actor.availability} class="text-[13px]" />
 						{/if}
@@ -84,7 +84,7 @@
 							href="/admin/actors/{actor.id}"
 							class="rounded-lg border border-[#35c9b8] px-4 py-2 text-[14px] text-[#35c9b8] transition-colors hover:bg-[#084a43]"
 						>
-							Edit
+							{m.common_edit()}
 						</a>
 
 						<form
@@ -92,20 +92,20 @@
 							action="?/toggleBlocked"
 							onsubmit={actor.blocked
 								? undefined
-								: confirmAction(`Deactivate ${actor.name}? They will be logged out and hidden from the website.`)}
+								: confirmAction(m.admin_confirm_deactivate({ name: actor.name }))}
 						>
 							<input type="hidden" name="id" value={actor.id} />
 							{#if actor.blocked}
 								<button
 									class="cursor-pointer rounded-lg bg-[#084a43] px-4 py-2 text-[14px] text-[#bfeee6] transition-colors hover:bg-[#0b5f56]"
 								>
-									Activate
+									{m.admin_activate()}
 								</button>
 							{:else}
 								<button
 									class="cursor-pointer rounded-lg border border-[#e05a5a]/70 px-4 py-2 text-[14px] text-[#f5c4c4] transition-colors hover:bg-[#3a1414]"
 								>
-									Deactivate
+									{m.admin_deactivate()}
 								</button>
 							{/if}
 						</form>

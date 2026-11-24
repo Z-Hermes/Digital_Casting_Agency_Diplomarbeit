@@ -1,5 +1,6 @@
 <script>
 	import { enhance } from '$app/forms';
+	import { m } from '$lib/paraglide/messages.js';
 
 	let { data, form } = $props();
 
@@ -24,7 +25,7 @@
 		if (!file) return;
 
 		if (file.size > MAX_MB * 1024 * 1024) {
-			fileProblem = `The video is too big (max. ${MAX_MB} MB). Tip: record in 1080p instead of 4K.`;
+			fileProblem = m.fyp_err_too_big({ mb: MAX_MB });
 			return;
 		}
 
@@ -41,7 +42,7 @@
 			}
 			duration = video.duration;
 			if (video.duration > MAX_SECONDS + 0.5) {
-				fileProblem = `This video is ${Math.ceil(video.duration)} seconds long (max. ${MAX_SECONDS}).`;
+				fileProblem = m.fyp_err_too_long({ seconds: Math.ceil(video.duration), max: MAX_SECONDS });
 			}
 		};
 		video.onerror = () => {
@@ -55,7 +56,7 @@
 	}
 
 	function confirmDelete(event) {
-		if (!confirm('Delete this video?')) event.preventDefault();
+		if (!confirm(m.common_confirm_delete_video())) event.preventDefault();
 	}
 
 	const button = 'cursor-pointer rounded-lg px-4 py-2 text-[14px] transition-colors';
@@ -64,17 +65,17 @@
 </script>
 
 <svelte:head>
-	<title>My videos | HD Studios</title>
+	<title>{m.myvideos_title()} | HD Studios</title>
 </svelte:head>
 
 <div class="mx-auto max-w-[900px] px-5 py-10 text-[#f2f2f0] md:px-10">
 	<a href="/user/{data.user.username}" class="text-[14px] text-[#35c9b8] hover:underline">
-		← Back to my profile
+		{m.common_back_to_profile()}
 	</a>
 
-	<h1 class="mt-6 text-[28px] md:text-[36px]">My videos</h1>
+	<h1 class="mt-6 text-[28px] md:text-[36px]">{m.myvideos_title()}</h1>
 	<p class="mt-1 text-[15px] text-[#8a8f8c]">
-		Short self-tape videos (max. 1 minute) that are shown on your profile.
+		{m.myvideos_text()}
 	</p>
 
 	<section class="mt-8 flex flex-col gap-6">
@@ -90,7 +91,7 @@
 
 		<div class="rounded-[15px] border border-[#2e332f] bg-[#1b201d] p-5 md:p-6">
 			<h2 class="text-[18px]">
-				Videos <span class="text-[#8a8f8c]">{data.videos.length}/{data.maxVideos}</span>
+				{m.myvideos_heading()} <span class="text-[#8a8f8c]">{data.videos.length}/{data.maxVideos}</span>
 			</h2>
 
 			{#if data.videos.length < data.maxVideos}
@@ -127,33 +128,33 @@
 						disabled={checking || uploading || fileProblem !== null}
 						class="{button} shrink-0 bg-[#35c9b8] font-medium text-[#101413] hover:bg-[#5fd8ca] disabled:cursor-default disabled:opacity-40"
 					>
-						{uploading ? 'Uploading…' : 'Upload'}
+						{uploading ? m.common_uploading() : m.common_upload()}
 					</button>
 				</form>
 
 				{#if fileProblem}
 					<p class="mt-2 text-[13px] text-[#e05a5a]" role="alert">{fileProblem}</p>
 				{:else if checking}
-					<p class="mt-2 text-[13px] text-[#8a8f8c]">Checking video length…</p>
+					<p class="mt-2 text-[13px] text-[#8a8f8c]">{m.common_checking_length()}</p>
 				{:else if duration !== null}
-					<p class="mt-2 text-[13px] text-[#8a8f8c]">Length: {Math.round(duration)} seconds ✓</p>
+					<p class="mt-2 text-[13px] text-[#8a8f8c]">{m.common_length_ok({ seconds: Math.round(duration) })}</p>
 				{:else if unchecked}
 					<p class="mt-2 text-[13px] text-[#8a8f8c]">
-						The length could not be checked in this browser – the server will check it.
+						{m.common_length_unknown()}
 					</p>
 				{/if}
 
 				<p class="mt-2 text-[13px] text-[#8a8f8c]">
-					MP4 or MOV, max. {MAX_SECONDS} seconds, max. {MAX_MB} MB. Tip: record in 1080p, not 4K.
+					{m.myvideos_hint({ seconds: MAX_SECONDS, mb: MAX_MB })}
 				</p>
 			{:else}
 				<p class="mt-4 text-[15px] text-[#8a8f8c]">
-					You have reached the maximum of {data.maxVideos} videos. Delete one to upload a new one.
+					{m.myvideos_max_reached({ max: data.maxVideos })}
 				</p>
 			{/if}
 
 			{#if data.videos.length === 0}
-				<p class="mt-5 text-[15px] text-[#8a8f8c]">No videos yet.</p>
+				<p class="mt-5 text-[15px] text-[#8a8f8c]">{m.myvideos_empty()}</p>
 			{:else}
 				<ul class="mt-5 grid gap-4 sm:grid-cols-2">
 					{#each data.videos as video (video.id)}
@@ -174,7 +175,7 @@
 							>
 								<input type="hidden" name="videoId" value={video.id} />
 								<button
-									aria-label="Delete video"
+									aria-label={m.common_delete_video()}
 									class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[#101413]/80 text-[16px] text-[#f5c4c4] transition-colors hover:bg-[#3a1414]"
 								>
 									✕

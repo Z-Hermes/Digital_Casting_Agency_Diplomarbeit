@@ -1,5 +1,6 @@
 <script>
     import { enhance } from '$app/forms';
+    import { m } from '$lib/paraglide/messages.js';
 
     let { form } = $props();
 
@@ -11,7 +12,7 @@
 </script>
 
 <svelte:head>
-	<title>Register | HD Studios</title>
+	<title>{m.register_title()} | HD Studios</title>
 </svelte:head>
 
 <div
@@ -30,15 +31,13 @@
 			</p>
 
 			<h1 class="mt-6 text-4xl font-light tracking-tight sm:text-6xl lg:mt-12">
-				Create Account
+				{m.register_heading()}
 			</h1>
 
 			<div class="mt-6 h-1 w-24 rounded-full bg-teal-400"></div>
 
 			<p class="mt-8 max-w-lg text-lg leading-relaxed text-teal-100/70 sm:text-xl">
-				Join HD Studios and create your professional profile.
-				Connect with actors, directors, producers and other people
-				working in the Albanian film industry.
+				{m.register_text()}
 			</p>
 		</div>
 
@@ -60,7 +59,7 @@
 
 				<div class="text-center">
 					<h2 class="text-3xl font-light">
-						Register
+						{m.register_title()}
 					</h2>
 
 					<div class="mx-auto mt-3 h-1 w-24 rounded-full bg-teal-400"></div>
@@ -77,7 +76,7 @@
 						type="text"
 						bind:value={name}
 						required
-						placeholder="Full name"
+						placeholder={m.register_full_name_ph()}
 						class="w-full rounded-lg border border-white/10 bg-[#162322] px-4 py-3 text-white outline-none transition placeholder:text-gray-400 focus:border-teal-400"
 					/>
 
@@ -89,8 +88,8 @@
 						minlength="3"
 						maxlength="40"
 						pattern="[A-Za-z0-9_\-]+"
-						title="3-40 characters: letters, numbers, _ and - (no spaces)"
-						placeholder="Username (no spaces)"
+						title={m.register_username_hint()}
+						placeholder={m.register_username_ph()}
 						class="w-full rounded-lg border border-white/10 bg-[#162322] px-4 py-3 text-white outline-none transition placeholder:text-gray-400 focus:border-teal-400"
 					/>
 
@@ -99,7 +98,7 @@
 						type="email"
 						bind:value={email}
 						required
-						placeholder="Email address"
+						placeholder={m.register_email_ph()}
 						class="w-full rounded-lg border border-white/10 bg-[#162322] px-4 py-3 text-white outline-none transition placeholder:text-gray-400 focus:border-teal-400"
 					/>
 
@@ -108,7 +107,7 @@
 						type="password"
 						bind:value={password}
 						required
-						placeholder="Password"
+						placeholder={m.register_password_ph()}
 						class="w-full rounded-lg border border-white/10 bg-[#162322] px-4 py-3 text-white outline-none transition placeholder:text-gray-400 focus:border-teal-400"
 					/>
 
@@ -118,10 +117,10 @@
 							bind:value={role}
 							class="w-full appearance-none rounded-lg border border-white/10 bg-[#162322] px-4 py-3 text-gray-300 outline-none transition focus:border-teal-400"
 						>
-							<option value="actor">Actor</option>
-							<option value="producer">Producer</option>
-							<option value="director">Director</option>
-							<option value="spectator">Guest</option>
+							<option value="actor">{m.role_actor()}</option>
+							<option value="producer">{m.role_producer()}</option>
+							<option value="director">{m.role_director()}</option>
+							<option value="spectator">{m.role_guest()}</option>
 						</select>
 
 						<div class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-teal-400">
@@ -144,16 +143,16 @@
 						type="submit"
 						class="w-full rounded-lg bg-teal-400 py-3 font-medium text-white transition hover:bg-teal-300"
 					>
-						Create Account
+						{m.register_heading()}
 					</button>
 
 					<p class="pt-2 text-center text-sm text-gray-400">
-						Already have an account?
+						{m.register_have_account()}
 						<a
 							href="/login"
 							class="ml-2 text-teal-400 transition hover:text-teal-300"
 						>
-							Login
+							{m.register_login()}
 						</a>
 					</p>
 

@@ -5,41 +5,48 @@
 	import Lightbox from '$lib/components/Lightbox.svelte';
 	import ProfileSection from '$lib/components/ProfileSection.svelte';
 	import { getStage, formatDate } from '$lib/filmStages.js';
+	import { m } from '$lib/paraglide/messages.js';
 
 	let { data, form } = $props();
 
 	const statusLabels = {
-		available: 'Available',
-		on_set: 'On set',
-		booked: 'Booked'
+		available: m.status_available(),
+		on_set: m.status_on_set(),
+		booked: m.status_booked()
+	};
+
+	const genderLabels = {
+		female: m.gender_female(),
+		male: m.gender_male(),
+		other: m.gender_other()
 	};
 
 	const roleLabels = {
-		admin: 'Admin',
-		director: 'Director',
-		producer: 'Producer',
-		actor: 'Actor',
-		spectator: 'Film fan'
+		admin: m.role_admin(),
+		director: m.role_director(),
+		producer: m.role_producer(),
+		actor: m.role_actor(),
+		spectator: m.role_film_fan()
 	};
 
 	const jobTypeLabels = {
-		film: 'Film',
-		series: 'Series',
-		theatre: 'Theatre',
-		commercial: 'Commercial'
+		film: m.credit_film(),
+		series: m.credit_series(),
+		theatre: m.credit_theatre(),
+		commercial: m.credit_commercial()
 	};
 
 	// names of the built-in blocks (shown in edit mode)
 	const builtinLabels = {
-		attributes: 'Attributes',
-		credits: 'Credits',
-		films: 'Films',
-		jobs: 'Open casting calls',
-		photos: 'Photos',
-		videos: 'Videos'
+		attributes: m.profile_attributes(),
+		credits: m.profile_credits(),
+		films: m.profile_films(),
+		jobs: m.profile_casting_calls(),
+		photos: m.profile_photos(),
+		videos: m.profile_videos()
 	};
 
-	const sectionTypeLabels = { text: 'Text', list: 'List', gallery: 'Gallery' };
+	const sectionTypeLabels = { text: m.section_type_text(), list: m.section_type_list(), gallery: m.section_type_gallery() };
 
 	let role = $derived(data.profile.role);
 	let isActor = $derived(role === 'actor');
@@ -79,7 +86,7 @@
 	}
 
 	function stopEditing() {
-		if (orderChanged && !confirm('The new order is not saved. Leave anyway?')) return;
+		if (orderChanged && !confirm(m.profile_confirm_leave())) return;
 		editing = false;
 	}
 
@@ -224,7 +231,7 @@
 						onclick={() => fileInput.click()}
 						class="w-full cursor-pointer rounded-lg border border-[#2e332f] px-4 py-2 text-[14px] transition-colors hover:border-[#35c9b8] disabled:cursor-wait disabled:opacity-60"
 					>
-						{uploading ? 'Uploading…' : data.profile.avatar_url ? 'Change photo' : 'Upload photo'}
+						{uploading ? m.common_uploading() : data.profile.avatar_url ? m.profile_change_photo() : m.profile_upload_photo()}
 					</button>
 				</form>
 
@@ -236,7 +243,7 @@
 					href="/user/{data.profile.username}/edit"
 					class="mt-3 block w-full rounded-lg border border-[#2e332f] px-4 py-2 text-center text-[14px] transition-colors hover:border-[#35c9b8]"
 				>
-					Edit profile info
+					{m.profile_edit_info()}
 				</a>
 
 				{#if editing}
@@ -245,7 +252,7 @@
 						onclick={stopEditing}
 						class="mt-3 w-full cursor-pointer rounded-lg bg-[#35c9b8] px-4 py-2 text-[14px] font-medium text-[#101413] hover:bg-[#5fd8ca]"
 					>
-						Done
+						{m.profile_done()}
 					</button>
 				{:else}
 					<button
@@ -253,7 +260,7 @@
 						onclick={startEditing}
 						class="mt-3 w-full cursor-pointer rounded-lg bg-[#35c9b8] px-4 py-2 text-[14px] font-medium text-[#101413] hover:bg-[#5fd8ca]"
 					>
-						Edit sections
+						{m.profile_edit_sections()}
 					</button>
 				{/if}
 			{/if}
@@ -270,12 +277,12 @@
 						<button
 							class="cursor-pointer rounded-lg border border-[#35c9b8] px-5 py-2 text-[14px] text-[#35c9b8] transition-colors hover:bg-[#084a43]"
 						>
-							Send message
+							{m.profile_send_message()}
 						</button>
 					</form>
 				{:else}
 					<a href="/login" class="mt-4 inline-block text-[14px] text-[#35c9b8] hover:underline">
-						Log in to send a message
+						{m.profile_login_to_message()}
 					</a>
 				{/if}
 				{#if form?.error}
@@ -287,19 +294,19 @@
 				<p class="mt-6 whitespace-pre-line text-[16px] leading-relaxed text-[#c7cdc9]">{data.profile.bio}</p>
 			{:else if data.isOwner}
 				<p class="mt-6 text-[15px] text-[#8a8f8c]">
-					No description yet. Add one with "Edit profile info".
+					{m.profile_no_description()}
 				</p>
 			{/if}
 
 			{#if !isActor}
 				<div class="mt-5 flex flex-wrap gap-x-8 gap-y-2 text-[15px] text-[#c7cdc9]">
-					<p><span class="text-[#8a8f8c]">Role:</span> {roleLabels[role] ?? role}</p>
+					<p><span class="text-[#8a8f8c]">{m.profile_role()}</span> {roleLabels[role] ?? role}</p>
 					<p>
-						<span class="text-[#8a8f8c]">Member since:</span>
+						<span class="text-[#8a8f8c]">{m.profile_member_since()}</span>
 						{new Date(data.profile.created_at).getFullYear()}
 					</p>
 					{#if isFilmmaker}
-						<p><span class="text-[#8a8f8c]">Films:</span> {data.films.length}</p>
+						<p><span class="text-[#8a8f8c]">{m.profile_films_count()}</span> {data.films.length}</p>
 					{/if}
 				</div>
 			{/if}
@@ -311,7 +318,7 @@
 					rel="noopener"
 					class="mt-6 inline-block rounded-lg bg-[#35c9b8] px-5 py-2 font-medium text-[#101413] transition hover:bg-[#5fd8ca]"
 				>
-					Download CV
+					{m.profile_download_cv()}
 				</a>
 			{/if}
 
@@ -320,7 +327,7 @@
 					href="/films/new"
 					class="mt-6 inline-block rounded-lg bg-[#35c9b8] px-5 py-2 font-medium text-[#101413] transition hover:bg-[#5fd8ca]"
 				>
-					Add film
+					{m.profile_add_film()}
 				</a>
 			{/if}
 		</div>
@@ -330,8 +337,7 @@
 	{#if editing}
 		<div class="mt-10 rounded-[15px] border border-dashed border-[#35c9b8]/60 bg-[#0f2523] p-4 md:p-5">
 			<p class="text-[15px]">
-				<strong>Edit mode.</strong> Drag a block by its bar (⠿) or use ▲ ▼ to change the order.
-				Visitors see the saved order.
+				<strong>{m.profile_edit_mode()}</strong> {m.profile_edit_mode_hint()}
 			</p>
 			<div class="mt-3 flex flex-wrap gap-3">
 				<form method="POST" action="?/saveLayout" use:enhance>
@@ -340,7 +346,7 @@
 						disabled={!orderChanged}
 						class="{smallButton} bg-[#35c9b8] font-medium text-[#101413] hover:bg-[#5fd8ca] disabled:cursor-default disabled:opacity-40"
 					>
-						Save order
+						{m.profile_save_order()}
 					</button>
 				</form>
 				<button
@@ -349,7 +355,7 @@
 					onclick={() => (order = [...data.layout])}
 					class="{smallButton} border border-[#2e332f] hover:border-[#8a8f8c] disabled:cursor-default disabled:opacity-40"
 				>
-					Undo changes
+					{m.profile_undo()}
 				</button>
 			</div>
 		</div>
@@ -390,15 +396,15 @@
 							ondragend={onDragEnd}
 							role="button"
 							tabindex="-1"
-							aria-label="Drag to move"
+							aria-label={m.profile_drag()}
 							class="flex min-w-0 flex-1 cursor-grab items-center gap-3 active:cursor-grabbing"
 						>
 							<span class="text-[20px] text-[#8a8f8c]" aria-hidden="true">⠿</span>
 							<span class="truncate text-[14px] text-[#a9b0ab]">{blockLabel(key)}</span>
 						</div>
 
-						<button type="button" class={iconButton} aria-label="Move up" disabled={order.indexOf(key) === 0} onclick={() => move(key, -1)}>▲</button>
-						<button type="button" class={iconButton} aria-label="Move down" disabled={order.indexOf(key) === order.length - 1} onclick={() => move(key, 1)}>▼</button>
+						<button type="button" class={iconButton} aria-label={m.profile_move_up()} disabled={order.indexOf(key) === 0} onclick={() => move(key, -1)}>▲</button>
+						<button type="button" class={iconButton} aria-label={m.profile_move_down()} disabled={order.indexOf(key) === order.length - 1} onclick={() => move(key, 1)}>▼</button>
 
 						{#if sectionsByKey[key]}
 							<form
@@ -406,13 +412,13 @@
 								action="?/deleteSection"
 								use:enhance
 								onsubmit={(event) => {
-									if (!confirm(`Delete the section "${sectionsByKey[key].title}"? Its content and photos are deleted too.`))
+									if (!confirm(m.profile_confirm_delete_section({ title: sectionsByKey[key].title })))
 										event.preventDefault();
 								}}
 							>
 								<input type="hidden" name="sectionId" value={sectionsByKey[key].id} />
 								<button class="cursor-pointer rounded-md border border-[#e05a5a]/70 px-2.5 py-1 text-[13px] text-[#f5c4c4] hover:bg-[#3a1414]">
-									Delete
+									{m.common_delete()}
 								</button>
 							</form>
 						{/if}
@@ -425,217 +431,17 @@
 
 				<!-- ----- attributes (from "Edit profile info") ----- -->
 				{:else if key === 'attributes'}
-					<h2 class="text-[26px]">Attributes</h2>
+					<h2 class="text-[26px]">{m.profile_attributes()}</h2>
 					<div class="mt-4 grid grid-cols-2 gap-x-8 gap-y-3 rounded-[15px] border border-[#2e332f] bg-[#1b201d] p-5 text-[15px] text-[#c7cdc9] sm:grid-cols-3 md:p-6">
-						{#if age(data.profile.birth_date)}<p><span class="block text-[13px] text-[#8a8f8c]">Age</span>{age(data.profile.birth_date)}</p>{/if}
-						{#if data.profile.gender}<p><span class="block text-[13px] text-[#8a8f8c]">Gender</span><span class="capitalize">{data.profile.gender}</span></p>{/if}
-						{#if data.profile.height_cm}<p><span class="block text-[13px] text-[#8a8f8c]">Height</span>{data.profile.height_cm} cm</p>{/if}
-						{#if data.profile.weight_kg}<p><span class="block text-[13px] text-[#8a8f8c]">Weight</span>{data.profile.weight_kg} kg</p>{/if}
-						{#if data.profile.eye_color}<p><span class="block text-[13px] text-[#8a8f8c]">Eyes</span>{data.profile.eye_color}</p>{/if}
-						{#if data.profile.hair_color}<p><span class="block text-[13px] text-[#8a8f8c]">Hair</span>{data.profile.hair_color}</p>{/if}
-						{#if data.profile.city}<p><span class="block text-[13px] text-[#8a8f8c]">City</span>{data.profile.city}</p>{/if}
-						{#if data.profile.education}<p class="col-span-2"><span class="block text-[13px] text-[#8a8f8c]">Education</span>{data.profile.education}</p>{/if}
+						{#if age(data.profile.birth_date)}<p><span class="block text-[13px] text-[#8a8f8c]">{m.profile_age()}</span>{age(data.profile.birth_date)}</p>{/if}
+						{#if data.profile.gender}<p><span class="block text-[13px] text-[#8a8f8c]">{m.profile_gender()}</span><span class="capitalize">{genderLabels[data.profile.gender] ?? data.profile.gender}</span></p>{/if}
+						{#if data.profile.height_cm}<p><span class="block text-[13px] text-[#8a8f8c]">{m.profile_height()}</span>{data.profile.height_cm} cm</p>{/if}
+						{#if data.profile.weight_kg}<p><span class="block text-[13px] text-[#8a8f8c]">{m.profile_weight()}</span>{data.profile.weight_kg} kg</p>{/if}
+						{#if data.profile.eye_color}<p><span class="block text-[13px] text-[#8a8f8c]">{m.profile_eyes()}</span>{data.profile.eye_color}</p>{/if}
+						{#if data.profile.hair_color}<p><span class="block text-[13px] text-[#8a8f8c]">{m.profile_hair()}</span>{data.profile.hair_color}</p>{/if}
+						{#if data.profile.city}<p><span class="block text-[13px] text-[#8a8f8c]">{m.profile_city()}</span>{data.profile.city}</p>{/if}
+						{#if data.profile.education}<p class="col-span-2"><span class="block text-[13px] text-[#8a8f8c]">{m.profile_education()}</span>{data.profile.education}</p>{/if}
 					</div>
 
 					{#if data.languages.length > 0}
-						<p class="mt-5 text-[14px] text-[#8a8f8c]">Languages</p>
-						<div class="mt-2 flex flex-wrap gap-2">
-							{#each data.languages as lang}
-								<span class="rounded-full bg-[#1b201d] px-3 py-1 text-[13px]">{lang}</span>
-							{/each}
-						</div>
-					{/if}
-
-					{#if lines(data.profile.awards).length > 0}
-						<p class="mt-5 text-[14px] text-[#8a8f8c]">Awards</p>
-						<ul class="mt-2 flex flex-col gap-1.5">
-							{#each lines(data.profile.awards) as award}
-								<li class="text-[15px] text-[#c7cdc9]">🏆 {award}</li>
-							{/each}
-						</ul>
-					{/if}
-
-					{#if editing}
-						<p class="mt-4 text-[13px] text-[#8a8f8c]">
-							Change these values with <a href="/user/{data.profile.username}/edit" class="text-[#35c9b8] hover:underline">Edit profile info</a>.
-						</p>
-					{/if}
-
-				<!-- ----- credits ----- -->
-				{:else if key === 'credits'}
-					<h2 class="text-[26px]">Credits</h2>
-					{#if data.credits.length > 0}
-						<div class="mt-4 divide-y divide-[#2e332f] rounded-[15px] border border-[#2e332f] bg-[#1b201d]">
-							{#each data.credits as credit}
-								<div class="flex flex-wrap items-baseline gap-x-4 gap-y-1 px-5 py-3">
-									<span class="w-12 shrink-0 text-[14px] text-[#8a8f8c]">{credit.year ?? '—'}</span>
-									<span class="text-[16px]">{credit.title}</span>
-									{#if credit.role_name}<span class="text-[14px] text-[#a9b0ab]">as {credit.role_name}</span>{/if}
-								</div>
-							{/each}
-						</div>
-					{:else}
-						<p class="mt-3 text-[#8a8f8c]">No credits yet.</p>
-					{/if}
-
-				<!-- ----- director / producer: films ----- -->
-				{:else if key === 'films'}
-					<h2 class="text-[26px]">Films</h2>
-					{#if data.films.length > 0}
-						<div class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-							{#each data.films as film}
-								{@const filmStage = getStage(film.stage)}
-								<a
-									href="/films/{film.id}"
-									class="overflow-hidden rounded-[15px] border border-[#2a302d] bg-[#1b201d] transition-colors hover:border-[#35c9b8]"
-								>
-									{#if film.poster_url}
-										<img src={film.poster_url} alt={film.title} class="h-[160px] w-full object-cover" />
-									{/if}
-									<div class="p-3">
-										<p class="text-[15px]">{film.title} {#if film.year}({film.year}){/if}</p>
-										{#if filmStage}
-											<span class="mt-2 inline-block rounded-full border px-2.5 py-0.5 text-[12px] leading-none {filmStage.color}">
-												{filmStage.badge}
-											</span>
-										{/if}
-									</div>
-								</a>
-							{/each}
-						</div>
-					{:else}
-						<p class="mt-3 text-[#8a8f8c]">No films yet.</p>
-					{/if}
-
-				<!-- ----- director / producer: open casting calls ----- -->
-				{:else if key === 'jobs'}
-					<h2 class="text-[26px]">Open casting calls</h2>
-					{#if data.jobs.length > 0}
-						<div class="mt-4 grid gap-4 sm:grid-cols-2">
-							{#each data.jobs as job}
-								<div class="rounded-[15px] border border-[#2a302d] bg-[#1b201d] p-4">
-									<p class="text-[16px]">{job.title}</p>
-									<p class="mt-1 text-[13px] text-[#8a8f8c]">
-										{jobTypeLabels[job.production_type] ?? job.production_type}{#if job.city} · {job.city}{/if}
-									</p>
-									{#if job.deadline}
-										<p class="mt-1 text-[13px] text-[#8a8f8c]">Apply until {formatDate(job.deadline)}</p>
-									{/if}
-								</div>
-							{/each}
-						</div>
-					{:else}
-						<p class="mt-3 text-[#8a8f8c]">No open casting calls.</p>
-					{/if}
-
-				<!-- ----- photos without a section (older uploads) ----- -->
-				{:else if key === 'photos'}
-					<h2 class="text-[26px]">Photos</h2>
-					<div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-						{#each data.media as item (item.id)}
-							<div class="relative">
-								<button
-									type="button"
-									onclick={() => openPhotos(legacyPhotoUrls, legacyPhotoUrls.indexOf(item.url))}
-									class="block w-full cursor-zoom-in overflow-hidden rounded-[15px]"
-									aria-label="Open photo"
-								>
-									<img
-										src={item.url}
-										alt=""
-										class="aspect-square w-full object-cover transition-transform duration-300 hover:scale-105"
-									/>
-								</button>
-
-								{#if editing}
-									<form
-										method="POST"
-										action="?/deletePhoto"
-										use:enhance
-										class="absolute top-2 right-2"
-										onsubmit={(event) => {
-											if (!confirm('Delete this photo?')) event.preventDefault();
-										}}
-									>
-										<input type="hidden" name="photoId" value={item.id} />
-										<button aria-label="Delete photo" class="cursor-pointer rounded-full bg-black/70 px-2.5 py-1 text-[13px] text-white hover:bg-[#e05a5a]">
-											✕
-										</button>
-									</form>
-								{/if}
-							</div>
-						{/each}
-					</div>
-
-				<!-- ----- self-tape videos (from /my-videos) ----- -->
-				{:else if key === 'videos'}
-					<h2 class="text-[26px]">Videos</h2>
-					<div class="mt-4 grid gap-4 sm:grid-cols-2">
-						{#each data.videos as video (video.id)}
-							<div class="relative">
-								<!-- svelte-ignore a11y_media_has_caption -->
-								<video
-									src={video.url}
-									controls
-									preload="metadata"
-									playsinline
-									class="aspect-video w-full rounded-[15px] border border-[#2e332f] bg-black"
-								></video>
-
-								{#if editing}
-									<form
-										method="POST"
-										action="?/deletePhoto"
-										use:enhance
-										class="absolute top-2 right-2"
-										onsubmit={(event) => {
-											if (!confirm('Delete this video?')) event.preventDefault();
-										}}
-									>
-										<input type="hidden" name="photoId" value={video.id} />
-										<button aria-label="Delete video" class="cursor-pointer rounded-full bg-black/70 px-2.5 py-1 text-[13px] text-white hover:bg-[#e05a5a]">
-											✕
-										</button>
-									</form>
-								{/if}
-							</div>
-						{/each}
-					</div>
-					{#if editing}
-						<p class="mt-3 text-[13px] text-[#8a8f8c]">
-							Upload new videos on <a href="/my-videos" class="text-[#35c9b8] hover:underline">My videos</a>.
-						</p>
-					{/if}
-				{/if}
-			</section>
-		{/if}
-	{/each}
-
-	<!-- ===================== ADD SECTION (edit mode) ===================== -->
-	{#if editing}
-		<form
-			method="POST"
-			action="?/addSection"
-			use:enhance
-			class="mt-12 rounded-[15px] border border-dashed border-[#2e332f] p-5 md:p-6"
-		>
-			<h2 class="text-[20px]">Add section</h2>
-			<p class="mt-1 text-[14px] text-[#8a8f8c]">
-				For example "Headshots" (gallery), "Skills" (list) or "About me" (text).
-			</p>
-			<div class="mt-4 flex flex-col gap-3 sm:flex-row">
-				<select name="type" aria-label="Section type" class="{field} sm:w-40">
-					<option value="text">Text</option>
-					<option value="list">List</option>
-					<option value="gallery">Gallery</option>
-				</select>
-				<input name="title" required maxlength="80" placeholder="Title of the section" aria-label="Section title" class={field} />
-				<button class="{smallButton} shrink-0 bg-[#35c9b8] font-medium text-[#101413] hover:bg-[#5fd8ca]">
-					+ Add
-				</button>
-			</div>
-		</form>
-	{/if}
-
-	<Lightbox photos={viewer.photos} bind:index={viewer.index} />
-</div>
+						<p class="mt-5 text-[14px] text-[#8a8f8c]">{m.profile_languages()}</p>
